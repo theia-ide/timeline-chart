@@ -1,91 +1,69 @@
-import { TimeGraphContainer, TimeGraphApplication } from "./time-graph";
-import { TimeGraphController } from "./time-graph-controller";
-
 export type TimeGraphInteractionType = 'mouseover' | 'mouseout' | 'mousemove' | 'mousedown' | 'mouseup' | 'mouseupoutside' | 'click';
 export type TimeGraphInteractionHandler = (event: PIXI.interaction.InteractionEvent) => void;
-export type TimeGraphInteractionHandlerMap = Map<TimeGraphInteractionType, TimeGraphInteractionHandler>
 
-export interface TimeGraphDisplayObject {
+export interface TimeGraphElementStyle {
     color?: number
     opacity?: number
 }
-
-export interface TimeGraphRect extends TimeGraphDisplayObject {
+export interface TimeGraphElementPosition {
     x: number
     y: number
-    w: number
-    h: number
 }
-
-export interface TimeGraphLine extends TimeGraphDisplayObject {
-    start: {
-        x: number
-        y: number
-    }
-    end: {
-        x: number
-        y: number
-    }
-    width?: number
+export interface TimeGraphHorizontalElement {
+    position: TimeGraphElementPosition
+    width: number
 }
+export interface TimeGraphVerticalElement {
+    position: TimeGraphElementPosition
+    height: number
+}
+export interface TimeGraphLineStyle extends TimeGraphElementStyle {
+    thickness?: number
+}
+export type TimeGraphRect = TimeGraphHorizontalElement & TimeGraphVerticalElement;
+export type TimeGraphStyledRect = TimeGraphRect & TimeGraphElementStyle;
+export type TimeGraphHorizontalLine = TimeGraphHorizontalElement & TimeGraphLineStyle;
+export type TimeGraphVerticalLine = TimeGraphVerticalElement & TimeGraphLineStyle;
 
 export abstract class TimeGraphComponent {
+    protected _displayObject: PIXI.Graphics;
 
-    protected _ctx: TimeGraphContainer;
-    protected _id: string;
-    protected _controller: TimeGraphController;
-    protected displayObject: PIXI.Graphics;
-    protected options: TimeGraphDisplayObject;
-
-    constructor(id: string, protected app: TimeGraphApplication, timeGraphController: TimeGraphController) {
-        this._id = id;
-        this._ctx = app.stage;
-        this._controller = timeGraphController;
-        this.displayObject = new PIXI.Graphics();
-        this._ctx.addChild(this.displayObject);
+    constructor(protected _id: string) {
+        this._displayObject = new PIXI.Graphics();
     }
 
     get id(): string {
         return this._id;
     }
 
-    get context(): TimeGraphContainer {
-        return this._ctx;
+    get displayObject(): PIXI.Graphics {
+        return this._displayObject;
     }
 
-    get controller(): TimeGraphController {
-        return this._controller;
+    clear() {
+        this._displayObject.clear();
     }
 
     abstract render(): void;
 
-    clear(){
-        this.displayObject.clear();
-    }
-
-    rect(opts: TimeGraphRect) {
-        const { x, y, w, h, color } = opts;
-        const c = this.controller;
-        const calcX = (x * c.zoomFactor) + c.positionOffset.x ;
-        const calcW = w * c.zoomFactor;
+    protected rect(opts: TimeGraphStyledRect) {
+        const { position, width, height, color } = opts;
         this.displayObject.beginFill((color || 0x000000));
-        this.displayObject.drawRect(calcX, y, calcW, h);
+        this.displayObject.drawRect(position.x, position.y, width, height);
         this.displayObject.endFill();
     }
 
-    line(opts: TimeGraphLine) {
-        const { width, color } = opts;
-        this.displayObject.lineStyle(width || 1, color || 0x000000);
-        this.displayObject.moveTo(opts.start.x, opts.start.y);
-        this.displayObject.lineTo((opts.end.x * this.controller.zoomFactor), opts.end.y);
+    protected hline(opts: TimeGraphHorizontalLine) {
+        const { position, width, thickness, color } = opts;
+        this.displayObject.lineStyle(thickness || 1, color || 0x000000);
+        this.displayObject.moveTo(position.x, position.y);
+        this.displayObject.lineTo(position.x + width, position.y);
     }
 
-    protected addEvent(event: TimeGraphInteractionType, handler: TimeGraphInteractionHandler) {
-        this.displayObject.interactive = true;
-        this.displayObject.on(event, (e: PIXI.interaction.InteractionEvent) => {
-            if (handler) {
-                handler(e);
-            }
-        });
+    protected vline(opts: TimeGraphVerticalLine) {
+        const { position, height, thickness, color } = opts;
+        this.displayObject.lineStyle(thickness || 1, color || 0x000000);
+        this.displayObject.moveTo(position.x, position.y);
+        this.displayObject.lineTo(position.x, position.y + height);
     }
 }

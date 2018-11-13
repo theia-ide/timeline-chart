@@ -1,7 +1,6 @@
-import { TimeGraphComponent } from "./time-graph-component";
-import { TimeGraphContainer } from "./time-graph";
+import { TimeGraphInteraction } from "./time-graph-interaction";
 
-export class TimeGraphController {
+export class TimeGraphStateController {
     protected _originalGraphWidth: number;
     protected _zoomFactor: number;
     protected _initialZoomFactor: number;
@@ -14,15 +13,13 @@ export class TimeGraphController {
         x: number;
         y: number;
     };
-    protected _components: TimeGraphComponent[];
-    protected _contexts: Map<string, TimeGraphContainer>;
 
     protected zoomChangedHandler: (() => void)[];
     protected positionChangedHandler: (() => void)[];
 
+    protected _zoomAndPanController: TimeGraphInteraction;
+
     constructor(protected _canvasWidth: number, protected _graphWidth: number) {
-        this._components = [];
-        this._contexts = new Map();
         this._originalGraphWidth = _graphWidth;
         this._initialZoomFactor = _canvasWidth / _graphWidth;
         this._graphWidth = this._originalGraphWidth * this._initialZoomFactor;
@@ -32,6 +29,11 @@ export class TimeGraphController {
         this._oldPositionOffset = { x: 0, y: 0 };
         this.zoomChangedHandler = [];
         this.positionChangedHandler = [];
+        this._zoomAndPanController = new TimeGraphInteraction(this);
+    }
+
+    get zoomAndPanController(): TimeGraphInteraction {
+        return this._zoomAndPanController;
     }
 
     protected handleZoomChange() {
@@ -107,20 +109,5 @@ export class TimeGraphController {
         y: number;
     }) {
         this._oldPositionOffset = value;
-    }
-
-    get components(): TimeGraphComponent[] {
-        return this._components;
-    }
-    addComponent(component: TimeGraphComponent) {
-        this.addContext(component.id, component.context);
-        this._components.push(component);
-    }
-
-    addContext(id: string, ctx: TimeGraphContainer) {
-        if (!this._contexts.get(id)) {
-            this._contexts.set(id, ctx);
-
-        }
     }
 }

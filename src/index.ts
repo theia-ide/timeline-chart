@@ -1,5 +1,7 @@
-import { TimeGraph, TimeGraphModel } from "./time-graph";
-// import { TimeAxis } from "./time-axis";
+import { TimeGraph } from "./time-graph";
+import { TimeGraphModel } from "./time-graph-model";
+import { TimeGraphAxis } from "./time-graph-axis";
+import { TimeGraphChart } from "./time-graph-chart";
 
 // const timeGraphSimple: TimeGraphModel = {
 //     id: 'test1',
@@ -112,26 +114,30 @@ const timeGraph: TimeGraphModel = {
             ]
         },
         {
+            range: {
+                start: 1000,
+                end: 2000
+            },
             states: [
                 {
                     label: 'state2.1',
                     range: {
-                        start: 145,
-                        end: 255
+                        start: 1145,
+                        end: 1255
                     }
                 },
                 {
                     label: 'state2.2',
                     range: {
-                        start: 265,
-                        end: 275
+                        start: 1265,
+                        end: 1275
                     }
                 },
                 {
                     label: 'state2.3',
                     range: {
-                        start: 365,
-                        end: 555
+                        start: 1365,
+                        end: 1555
                     }
                 }
             ]
@@ -139,38 +145,28 @@ const timeGraph: TimeGraphModel = {
     ]
 }
 
+const tg = new TimeGraph('main', timeGraph);
 
+const timeAxis = new TimeGraphAxis({
+    id: 'timeGraphAxis',
+    height: 30,
+    width: 500
+}, timeGraph.range, tg.controller);
 
-// const tg = new TimeGraph('main');
+const timeGraphChart = new TimeGraphChart({
+    id: timeGraph.id + '_chart',
+    height: 300,
+    width: 500
+}, timeGraph.range, tg.controller);
+timeGraphChart.addRows(timeGraph.rows);
 
-// const timeAxis = new TimeAxis({
-//     id: 'timeAxis',
-//     height: 30,
-//     width: 6000
-// });
-// tg.setTimeAxis(timeAxis)
-
-// r1 = new TimeGraphRow(row-config)
-// r2 = new TimeGraphRow(row-config)
-
-// tg.addRows([r1, r2])
-// tg.removeRows([r2])
-
-// s1 = new TimeGraphState(state-config)
-// s2 = new TimeGraphState(state-config)
-
-// r = tg.findRow(row-id)
-// r.addStates([s1])
-// r1.addStates([s2])
-
-const chart = new TimeGraph('main', timeGraph);
-chart.render();
-
+tg.timeGraphAxis = timeAxis;
+tg.timeGraphChart = timeGraphChart;
 
 export type TestFieldId = 'test0' | 'test1' | 'test2' | 'test3' | 'test4' | 'test5' | 'test6' | 'test7' | 'test8' | 'test9';
-export function tgTest(id: TestFieldId, val:string){
+export function tgTest(id: TestFieldId, val: string) {
     const f = document.getElementById(id);
-    if(f){
+    if (f) {
         f.innerHTML = val;
     }
 }

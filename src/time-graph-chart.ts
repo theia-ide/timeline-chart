@@ -39,7 +39,7 @@ export class TimeGraphChart extends TimeGraphContainer {
                     end: (rowElement.range.end * this._controller.zoomFactor) + this._controller.positionOffset.x
                 }
             }
-            const el = new TimeGraphRowElement(rowId + '_el_' + idx, newRowElement, rowComponent);
+            const el = new TimeGraphRowElement(rowId + '_el_' + idx, newRowElement, rowComponent, this._controller.timeGraphInteraction);
             this.addChild(el);
         });
     }

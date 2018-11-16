@@ -5,6 +5,8 @@ import { TimeGraphStateController } from "./time-graph-state-controller";
 
 export class TimeGraphAxis extends TimeGraphContainer {
 
+    protected scaleComponent: TimeGraphAxisScale;
+
     constructor(protected canvasOpts: TimeGraphContainerOptions, protected range: TimeGraphRange, protected controller: TimeGraphStateController) {
         super({
             id: canvasOpts.id,
@@ -13,22 +15,25 @@ export class TimeGraphAxis extends TimeGraphContainer {
             backgroundColor: 0xAA30f0
         }, controller);
 
-        this.update();
-        this.controller.zoomAndPanController.addMousewheelZoomAndPan(this.canvas);
+        this.init();
+        this.controller.timeGraphInteraction.addMousewheelZoomAndPan(this.canvas);
     }
 
-    update() {
-        this.stage.removeChildren();
-        const scaleComponent = new TimeGraphAxisScale(this.canvasOpts.id + '_scale', {
+    init() {
+        this.scaleComponent = new TimeGraphAxisScale(this.canvasOpts.id + '_scale', {
             height: 30,
             width: (this.range.end - this.range.start) * this._controller.zoomFactor,
             position: {
                 x: this._controller.positionOffset.x,
                 y: 0
             }
-        });
+        }, this._controller.timeGraphInteraction);
 
-        this.addChild(scaleComponent);
-        this.controller.zoomAndPanController.addDnDZoomAndPan(scaleComponent.displayObject);
+        this.addChild(this.scaleComponent);
+    }
+
+    update() {
+        this.scaleComponent.clear();
+        this.scaleComponent.render();
     }
 }

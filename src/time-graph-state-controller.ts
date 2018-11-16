@@ -17,7 +17,7 @@ export class TimeGraphStateController {
     protected zoomChangedHandler: (() => void)[];
     protected positionChangedHandler: (() => void)[];
 
-    protected _zoomAndPanController: TimeGraphInteraction;
+    protected _timeGraphInteraction: TimeGraphInteraction;
 
     constructor(protected _canvasWidth: number, protected _graphWidth: number) {
         this._originalGraphWidth = _graphWidth;
@@ -29,11 +29,11 @@ export class TimeGraphStateController {
         this._oldPositionOffset = { x: 0, y: 0 };
         this.zoomChangedHandler = [];
         this.positionChangedHandler = [];
-        this._zoomAndPanController = new TimeGraphInteraction(this);
+        this._timeGraphInteraction = new TimeGraphInteraction(this);
     }
 
-    get zoomAndPanController(): TimeGraphInteraction {
-        return this._zoomAndPanController;
+    get timeGraphInteraction(): TimeGraphInteraction {
+        return this._timeGraphInteraction;
     }
 
     protected handleZoomChange() {

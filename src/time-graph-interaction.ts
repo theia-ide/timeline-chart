@@ -3,6 +3,12 @@ import { TimeGraphStateController } from "./time-graph-state-controller";
 export type TimeGraphInteractionType = 'mouseover' | 'mouseout' | 'mousemove' | 'mousedown' | 'mouseup' | 'mouseupoutside' | 'click';
 export type TimeGraphInteractionHandler = (event: PIXI.interaction.InteractionEvent) => void;
 
+export interface DragAndDropNavigationHandler {
+    start: TimeGraphInteractionHandler
+    move: TimeGraphInteractionHandler
+    end: TimeGraphInteractionHandler
+}
+
 export class TimeGraphInteraction {
     protected mouseStartY: number;
     protected mouseStartX: number;
@@ -10,7 +16,7 @@ export class TimeGraphInteraction {
 
     protected mouseIsDown: boolean = false;
 
-    constructor(protected controller: TimeGraphStateController) {}
+    constructor(protected controller: TimeGraphStateController) { }
 
     addMousewheelZoomAndPan(canvas: HTMLCanvasElement) {
         canvas.addEventListener('mousewheel', (ev: WheelEvent) => {
@@ -23,31 +29,28 @@ export class TimeGraphInteraction {
         });
     }
 
-    addDnDZoomAndPan(displayObject: PIXI.DisplayObject) {
-        this.addEvent('mousedown', event => {
-            this.mouseStartY = event.data.global.y;
-            this.mouseStartX = event.data.global.x;
-            this.graphWidthStart = this.controller.graphWidth;
-            this.mouseIsDown = true;
-        }, displayObject);
-
-        this.addEvent('mousemove', event => {
-            if (this.mouseIsDown) {
-
-                const deltaY = event.data.global.y - this.mouseStartY;
-                const zoomMulti = (deltaY / 100);
-                this.zoom(zoomMulti);
-
-                const deltaMouseX = event.data.global.x - this.mouseStartX;
-                this.setXOffset(deltaMouseX);
+    get dnDZoomAndPan(): DragAndDropNavigationHandler {
+        return {
+            start: event => {
+                this.mouseStartY = event.data.global.y;
+                this.mouseStartX = event.data.global.x;
+                this.graphWidthStart = this.controller.graphWidth;
+                this.mouseIsDown = true;
+            },
+            move: event => {
+                if (this.mouseIsDown) {
+                    const deltaY = event.data.global.y - this.mouseStartY;
+                    const zoomMulti = (deltaY / 100);
+                    this.zoom(zoomMulti);
+                    const deltaMouseX = event.data.global.x - this.mouseStartX;
+                    this.setXOffset(deltaMouseX);
+                }
+            },
+            end: event => {
+                this.mouseIsDown = false;
+                this.setZoomAndPosition();
             }
-        }, displayObject);
-        const mouseUp = (event: PIXI.interaction.InteractionEvent) => {
-            this.mouseIsDown = false;
-            this.setZoomAndPosition();
         }
-        this.addEvent('mouseup', mouseUp, displayObject);
-        this.addEvent('mouseupoutside', mouseUp, displayObject);
     }
 
     protected setZoomAndPosition() {
@@ -82,7 +85,7 @@ export class TimeGraphInteraction {
         }
     }
 
-    protected addEvent(event: TimeGraphInteractionType, handler: TimeGraphInteractionHandler, displayObject: PIXI.DisplayObject) {
+    addEvent(event: TimeGraphInteractionType, handler: TimeGraphInteractionHandler, displayObject: PIXI.DisplayObject) {
         displayObject.interactive = true;
         displayObject.on(event, (e: PIXI.interaction.InteractionEvent) => {
             if (handler) {

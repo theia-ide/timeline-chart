@@ -6,12 +6,12 @@ export interface TimeGraphRange {
 export interface TimeGraphModel {
     id: string
     name: string
-    range: TimeGraphRange
+    totalRange: number
     rows: TimeGraphRowModel[]
 }
 
 export interface TimeGraphRowModel {
-    range?: TimeGraphRange
+    range: TimeGraphRange
     states: TimeGraphRowElementModel[]
 }
 

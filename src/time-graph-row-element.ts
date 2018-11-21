@@ -1,13 +1,12 @@
 import { TimeGraphComponent, TimeGraphStyledRect } from "./time-graph-component";
 import { TimeGraphRow } from "./time-graph-row";
 import { TimeGraphRowElementModel } from "./time-graph-model";
-import { TimeGraphInteraction } from "./time-graph-interaction";
 
 export class TimeGraphRowElement extends TimeGraphComponent {
 
     protected style: TimeGraphStyledRect;
 
-    constructor(id: string, protected options: TimeGraphRowElementModel, protected row: TimeGraphRow, interaction: TimeGraphInteraction) {
+    constructor(id: string, protected options: TimeGraphRowElementModel, protected row: TimeGraphRow) {
         super(id);
         const height = 20;
         const position = {
@@ -23,10 +22,10 @@ export class TimeGraphRowElement extends TimeGraphComponent {
             width
         };
 
-        interaction.addEvent('mouseover', this.handleMouseOver, this._displayObject);
-        interaction.addEvent('mouseout', this.handleMouseOut, this._displayObject);
-        interaction.addEvent('mousedown', this.handleMouseDown, this._displayObject);
-        interaction.addEvent('mouseup', this.handleMouseUp, this._displayObject);
+        this.addEvent('mouseover', this.handleMouseOver, this._displayObject);
+        this.addEvent('mouseout', this.handleMouseOut, this._displayObject);
+        this.addEvent('mousedown', this.handleMouseDown, this._displayObject);
+        this.addEvent('mouseup', this.handleMouseUp, this._displayObject);
     }
 
     render() {

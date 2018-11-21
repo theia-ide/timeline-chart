@@ -66,4 +66,13 @@ export abstract class TimeGraphComponent {
         this.displayObject.moveTo(position.x, position.y);
         this.displayObject.lineTo(position.x, position.y + height);
     }
+
+    addEvent(event: TimeGraphInteractionType, handler: TimeGraphInteractionHandler, displayObject: PIXI.DisplayObject) {
+        displayObject.interactive = true;
+        displayObject.on(event, (e: PIXI.interaction.InteractionEvent) => {
+            if (handler) {
+                handler(e);
+            }
+        });
+    }
 }

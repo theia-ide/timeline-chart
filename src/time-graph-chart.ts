@@ -1,45 +1,53 @@
 import { TimeGraphContainer, TimeGraphContainerOptions } from "./time-graph-container";
 import { TimeGraphRowElement } from "./time-graph-row-element";
 import { TimeGraphRow } from "./time-graph-row";
-import { TimeGraphRowModel, TimeGraphRowElementModel, TimeGraphRange } from "./time-graph-model";
-import { TimeGraphStateController } from "./time-graph-state-controller";
+import { TimeGraphRowModel, TimeGraphRowElementModel } from "./time-graph-model";
+import { TimeGraphUnitController } from "./time-graph-unit-controller";
 
 export class TimeGraphChart extends TimeGraphContainer {
 
     protected rows: TimeGraphRowModel[];
 
-    constructor(canvasOpts: TimeGraphContainerOptions, protected range: TimeGraphRange, controller: TimeGraphStateController) {
+    constructor(canvasOpts: TimeGraphContainerOptions, unitController: TimeGraphUnitController) {
         super({
             id: canvasOpts.id,
             height: canvasOpts.height,
             width: canvasOpts.width,
             backgroundColor: 0xFFFFFF
-        }, controller);
+        }, unitController);
         this.rows = [];
+
+        this.unitController.onViewRangeChanged(() => {
+            this.update();
+        });
     }
 
     addRow(row: TimeGraphRowModel) {
         const height = 20;
         const rowId = 'row_' + this._stage.children.length;
+        const range = row.range.end - row.range.start;
+        const relativeStartPosition = row.range.start - this.unitController.viewRange.start;
         const rowComponent = new TimeGraphRow(rowId, {
             position: {
-                x: 0, // TODO must be calculated by zoom and pan
+                x: relativeStartPosition * this.stateController.zoomFactor,
                 y: (height * this.rows.length) + height / 2
             },
-            width: this.range.end
+            width: range * this.stateController.zoomFactor
         });
         this.addChild(rowComponent);
         this.rows.push(row);
 
         row.states.forEach((rowElement: TimeGraphRowElementModel, idx: number) => {
+            const relativeElementStartPosition = rowElement.range.start - this.unitController.viewRange.start;
+            const relativeElementEndPosition = rowElement.range.end - this.unitController.viewRange.start
             const newRowElement: TimeGraphRowElementModel = {
                 label: rowElement.label,
                 range: {
-                    start: (rowElement.range.start * this._controller.zoomFactor) + this._controller.positionOffset.x,
-                    end: (rowElement.range.end * this._controller.zoomFactor) + this._controller.positionOffset.x
+                    start: (relativeElementStartPosition * this.stateController.zoomFactor) + this.stateController.positionOffset.x,
+                    end: (relativeElementEndPosition * this.stateController.zoomFactor) + this.stateController.positionOffset.x
                 }
             }
-            const el = new TimeGraphRowElement(rowId + '_el_' + idx, newRowElement, rowComponent, this._controller.timeGraphInteraction);
+            const el = new TimeGraphRowElement(rowId + '_el_' + idx, newRowElement, rowComponent);
             this.addChild(el);
         });
     }

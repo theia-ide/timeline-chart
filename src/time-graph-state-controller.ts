@@ -1,15 +1,15 @@
-import { TimeGraphInteraction } from "./time-graph-interaction";
+import { TimeGraphUnitController } from "./time-graph-unit-controller";
 
 export class TimeGraphStateController {
-    protected _originalGraphWidth: number;
-    protected _zoomFactor: number;
-    protected _initialZoomFactor: number;
-    protected _oldZoomFactor: number;
-    protected _positionOffset: {
+    oldPositionOffset: {
         x: number;
         y: number;
     };
-    protected _oldPositionOffset: {
+    canvasWidth: number;
+
+    protected _zoomFactor: number;
+    protected _initialZoomFactor: number;
+    protected _positionOffset: {
         x: number;
         y: number;
     };
@@ -17,23 +17,13 @@ export class TimeGraphStateController {
     protected zoomChangedHandler: (() => void)[];
     protected positionChangedHandler: (() => void)[];
 
-    protected _timeGraphInteraction: TimeGraphInteraction;
-
-    constructor(protected _canvasWidth: number, protected _graphWidth: number) {
-        this._originalGraphWidth = _graphWidth;
-        this._initialZoomFactor = _canvasWidth / _graphWidth;
-        this._graphWidth = this._originalGraphWidth * this._initialZoomFactor;
-        this._zoomFactor = this._initialZoomFactor;
-        this._oldZoomFactor = this._zoomFactor;
+    constructor(protected canvas: HTMLCanvasElement, protected unitController: TimeGraphUnitController) {
+        this.canvasWidth = canvas.width;
+        this._initialZoomFactor = this.zoomFactor;
         this._positionOffset = { x: 0, y: 0 };
-        this._oldPositionOffset = { x: 0, y: 0 };
+        this.oldPositionOffset = { x: 0, y: 0 };
         this.zoomChangedHandler = [];
         this.positionChangedHandler = [];
-        this._timeGraphInteraction = new TimeGraphInteraction(this);
-    }
-
-    get timeGraphInteraction(): TimeGraphInteraction {
-        return this._timeGraphInteraction;
     }
 
     protected handleZoomChange() {
@@ -50,38 +40,17 @@ export class TimeGraphStateController {
         this.positionChangedHandler.push(handler);
     }
 
-    get canvasWidth(): number {
-        return this._canvasWidth;
-    }
-    set canvasWidth(value: number) {
-        this._canvasWidth = value;
-    }
-
-    get graphWidth(): number {
-        return this._graphWidth;
-    }
-    set graphWidth(value: number) {
-        this._graphWidth = value;
-    }
-
     get initialZoomFactor(): number {
         return this._initialZoomFactor;
     }
 
-    get zoomFactor(): number {
+    get zoomFactor(): number{
+        this._zoomFactor = this.canvas.width / this.unitController.viewRangeLength;
         return this._zoomFactor;
     }
-    set zoomFactor(value: number) {
-        this._zoomFactor = value;
-        this._graphWidth = this._zoomFactor * this._originalGraphWidth;
-        this.handleZoomChange();
-    }
 
-    get oldZoomFactor(): number {
-        return this._oldZoomFactor;
-    }
-    set oldZoomFactor(value: number) {
-        this._oldZoomFactor = value;
+    get absoluteResolution(): number {
+        return this.canvasWidth / this.unitController.absoluteRange;
     }
 
     get positionOffset(): {
@@ -96,18 +65,5 @@ export class TimeGraphStateController {
     }) {
         this._positionOffset = value;
         this.handlePositionChange();
-    }
-
-    get oldPositionOffset(): {
-        x: number;
-        y: number;
-    } {
-        return this._oldPositionOffset;
-    }
-    set oldPositionOffset(value: {
-        x: number;
-        y: number;
-    }) {
-        this._oldPositionOffset = value;
     }
 }

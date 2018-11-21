@@ -1,5 +1,6 @@
 import { TimeGraphComponent } from "./time-graph-component";
 import * as PIXI from "pixi.js";
+import { TimeGraphUnitController } from "./time-graph-unit-controller";
 import { TimeGraphStateController } from "./time-graph-state-controller";
 
 export interface TimeGraphContainerOptions {
@@ -14,9 +15,9 @@ export abstract class TimeGraphContainer {
     protected _stage: PIXI.Container;
     protected _canvas: HTMLCanvasElement;
 
-    protected _controller: TimeGraphStateController;
+    protected stateController: TimeGraphStateController;
 
-    constructor(config: TimeGraphContainerOptions, controller: TimeGraphStateController) {
+    constructor(config: TimeGraphContainerOptions, protected unitController: TimeGraphUnitController) {
         const canvas: HTMLCanvasElement = document.createElement('canvas');
         canvas.width = config.width;
         canvas.height = config.height;
@@ -33,7 +34,7 @@ export abstract class TimeGraphContainer {
         this._stage = application.stage;
         this._canvas = application.view;
 
-        this._controller = controller;
+        this.stateController = new TimeGraphStateController(canvas, unitController);
     }
 
     get canvas(): HTMLCanvasElement {

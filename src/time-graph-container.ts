@@ -8,6 +8,7 @@ export interface TimeGraphContainerOptions {
     width: number
     height: number
     backgroundColor?: number
+    transparent?: boolean
 }
 
 export abstract class TimeGraphContainer {
@@ -17,7 +18,7 @@ export abstract class TimeGraphContainer {
 
     protected stateController: TimeGraphStateController;
 
-    constructor(config: TimeGraphContainerOptions, protected unitController: TimeGraphUnitController) {
+    constructor(protected config: TimeGraphContainerOptions, protected unitController: TimeGraphUnitController) {
         const canvas: HTMLCanvasElement = document.createElement('canvas');
         canvas.width = config.width;
         canvas.height = config.height;
@@ -27,7 +28,8 @@ export abstract class TimeGraphContainer {
             width: config.width,
             height: config.height,
             view: canvas,
-            backgroundColor: config.backgroundColor || 0x000000
+            backgroundColor: config.backgroundColor,
+            transparent: config.transparent
         });
         application.stage.height = config.height;
 
@@ -35,7 +37,11 @@ export abstract class TimeGraphContainer {
         this._canvas = application.view;
 
         this.stateController = new TimeGraphStateController(canvas, unitController);
+
+        this.init();
     }
+
+    protected init(){}
 
     get canvas(): HTMLCanvasElement {
         return this._canvas;

@@ -1,20 +1,11 @@
 import { TimeGraphAxisScale } from "./time-graph-axis-scale";
-import { TimeGraphContainer, TimeGraphContainerOptions } from "./time-graph-container";
-import { TimeGraphUnitController } from "./time-graph-unit-controller";
+import { TimeGraphAxisCursorContainer } from "./time-graph-axis-cursor-container";
 
-export class TimeGraphAxis extends TimeGraphContainer {
+export class TimeGraphAxis extends TimeGraphAxisCursorContainer {
 
     protected scaleComponent: TimeGraphAxisScale;
 
-    constructor(protected canvasOpts: TimeGraphContainerOptions, protected unitController: TimeGraphUnitController) {
-        super({
-            id: canvasOpts.id,
-            height: canvasOpts.height,
-            width: canvasOpts.width,
-            backgroundColor: 0xAA30f0
-        }, unitController);
-
-        this.init();
+    protected init() {
         this._canvas.addEventListener('mousewheel', (ev: WheelEvent) => {
             const shiftStep = ev.deltaY * 10;
             const oldViewRange = this.unitController.viewRange;
@@ -30,23 +21,30 @@ export class TimeGraphAxis extends TimeGraphContainer {
             this.unitController.viewRange = { start, end }
             return false;
         });
-    }
-
-    init() {
-        this.scaleComponent = new TimeGraphAxisScale(this.canvasOpts.id + '_scale', {
+        this.scaleComponent = new TimeGraphAxisScale(this.config.id + '_scale', {
             height: 30,
-            width: this.unitController.viewRangeLength * this.stateController.zoomFactor,
+            width: this._canvas.width,
             position: {
-                x: this.stateController.positionOffset.x,
+                x: 0,
                 y: 0
             }
         }, this.unitController, this.stateController);
 
         this.addChild(this.scaleComponent);
+
+        this.unitController.onSelectionRangeChange(() => this.update());
+        this.unitController.onViewRangeChanged(() => this.update());
     }
 
     update() {
-        this.scaleComponent.clear();
-        this.scaleComponent.render();
+        this.scaleComponent.update({
+            height: 30,
+            width: this._canvas.width,
+            position: {
+                x: 0,
+                y: 0
+            }
+        });
+        super.update();
     }
 }

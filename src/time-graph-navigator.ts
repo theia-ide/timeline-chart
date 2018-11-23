@@ -1,11 +1,13 @@
 import { TimeGraphContainer, TimeGraphContainerOptions } from "./time-graph-container";
 import { TimeGraphUnitController } from "./time-graph-unit-controller";
-import { TimeGraphComponent } from "./time-graph-component";
+import { TimeGraphComponent, TimeGraphStyledRect } from "./time-graph-component";
 import { TimeGraphStateController } from "./time-graph-state-controller";
+import { TimeGraphRectangle } from "./time-graph-rectangle";
 
 export class TimeGraphNavigator extends TimeGraphContainer {
 
-    protected scaleComponent: TimeGraphNavigatorHandle;
+    protected navigatorHandle: TimeGraphNavigatorHandle;
+    protected selectionRange: TimeGraphRectangle;
 
     constructor(protected canvasOpts: TimeGraphContainerOptions, protected unitController: TimeGraphUnitController) {
         super({
@@ -16,13 +18,35 @@ export class TimeGraphNavigator extends TimeGraphContainer {
         }, unitController);
 
         this.unitController.onViewRangeChanged(() => this.update());
-        this.scaleComponent = new TimeGraphNavigatorHandle(this.unitController, this.stateController);
-        this.addChild(this.scaleComponent);
+        this.navigatorHandle = new TimeGraphNavigatorHandle(this.unitController, this.stateController);
+        this.addChild(this.navigatorHandle);
+        this.unitController.onSelectionRangeChange(() => this.update());
     }
 
     update() {
-        this.scaleComponent.clear();
-        this.scaleComponent.render();
+        this.navigatorHandle.clear();
+        this.navigatorHandle.render();
+
+        if (this.unitController.selectionRange) {
+            const selectionOpts: TimeGraphStyledRect = {
+                color: 0xf6f666,
+                height: this.canvasOpts.height,
+                opacity: 0.5,
+                position: {
+                    x: this.unitController.selectionRange.start * this.stateController.absoluteResolution,
+                    y: 0
+                },
+                width: (this.unitController.selectionRange.end - this.unitController.selectionRange.start) * this.stateController.absoluteResolution
+            };
+            if (!this.selectionRange) {
+                this.selectionRange = new TimeGraphRectangle(selectionOpts);
+                this.addChild(this.selectionRange);
+            } else {
+                this.selectionRange.displayObject.clear();
+                this.selectionRange.setOptions(selectionOpts);
+                this.selectionRange.render();
+            }
+        }
     }
 }
 

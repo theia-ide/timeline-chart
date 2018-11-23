@@ -1,22 +1,15 @@
-import { TimeGraphContainer, TimeGraphContainerOptions } from "./time-graph-container";
 import { TimeGraphRowElement } from "./time-graph-row-element";
 import { TimeGraphRow } from "./time-graph-row";
 import { TimeGraphRowModel, TimeGraphRowElementModel } from "./time-graph-model";
-import { TimeGraphUnitController } from "./time-graph-unit-controller";
+import { TimeGraphCursorContainer } from "./time-graph-cursor-container";
+import { TimeGraphRectangle } from "./time-graph-rectangle";
 
-export class TimeGraphChart extends TimeGraphContainer {
+export class TimeGraphChart extends TimeGraphCursorContainer {
 
     protected rows: TimeGraphRowModel[];
 
-    constructor(canvasOpts: TimeGraphContainerOptions, unitController: TimeGraphUnitController) {
-        super({
-            id: canvasOpts.id,
-            height: canvasOpts.height,
-            width: canvasOpts.width,
-            backgroundColor: 0xFFFFFF
-        }, unitController);
-        this.rows = [];
-
+    protected init(){
+        super.init();
         this.unitController.onViewRangeChanged(() => {
             this.update();
         });
@@ -39,20 +32,31 @@ export class TimeGraphChart extends TimeGraphContainer {
 
         row.states.forEach((rowElement: TimeGraphRowElementModel, idx: number) => {
             const relativeElementStartPosition = rowElement.range.start - this.unitController.viewRange.start;
-            const relativeElementEndPosition = rowElement.range.end - this.unitController.viewRange.start
-            const newRowElement: TimeGraphRowElementModel = {
-                label: rowElement.label,
-                range: {
-                    start: (relativeElementStartPosition * this.stateController.zoomFactor) + this.stateController.positionOffset.x,
-                    end: (relativeElementEndPosition * this.stateController.zoomFactor) + this.stateController.positionOffset.x
+            const relativeElementEndPosition = rowElement.range.end - this.unitController.viewRange.start;
+            const start = (relativeElementStartPosition * this.stateController.zoomFactor) + this.stateController.positionOffset.x;
+            const end = (relativeElementEndPosition * this.stateController.zoomFactor) + this.stateController.positionOffset.x;
+            if (start < this._canvas.width && end > 0) {
+                const newRowElement: TimeGraphRowElementModel = {
+                    label: rowElement.label,
+                    range: {
+                        start,
+                        end
+                    }
                 }
+                const el = new TimeGraphRowElement(rowId + '_el_' + idx, newRowElement, rowComponent);
+                this.addChild(el);
             }
-            const el = new TimeGraphRowElement(rowId + '_el_' + idx, newRowElement, rowComponent);
-            this.addChild(el);
         });
     }
 
     addRows(rows: TimeGraphRowModel[]) {
+        const background = new TimeGraphRectangle({
+            position: {x: 0, y:0},
+            height: this._canvas.height,
+            width: this.canvas.width,
+            color: 0xffffff
+        });
+        this.addChild(background);
         this.rows = [];
         rows.forEach(row => {
             this.addRow(row);
@@ -62,6 +66,7 @@ export class TimeGraphChart extends TimeGraphContainer {
     update() {
         this.stage.removeChildren();
         this.addRows(this.rows);
+        super.update();
     }
 
 }

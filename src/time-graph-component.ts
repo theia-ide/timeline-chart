@@ -1,6 +1,8 @@
 export type TimeGraphInteractionType = 'mouseover' | 'mouseout' | 'mousemove' | 'mousedown' | 'mouseup' | 'mouseupoutside' | 'click';
 export type TimeGraphInteractionHandler = (event: PIXI.interaction.InteractionEvent) => void;
 
+export type TimeGraphComponentOptions = {}
+
 export interface TimeGraphElementStyle {
     color?: number
     opacity?: number
@@ -27,6 +29,7 @@ export type TimeGraphVerticalLine = TimeGraphVerticalElement & TimeGraphLineStyl
 
 export abstract class TimeGraphComponent {
     protected _displayObject: PIXI.Graphics;
+    protected options: TimeGraphComponentOptions;
 
     constructor(protected _id: string) {
         this._displayObject = new PIXI.Graphics();
@@ -44,11 +47,19 @@ export abstract class TimeGraphComponent {
         this._displayObject.clear();
     }
 
+    update(opts?: TimeGraphComponentOptions) {
+        if (opts) {
+            this.options = opts;
+        }
+        this.clear();
+        this.render();
+    }
+
     abstract render(): void;
 
     protected rect(opts: TimeGraphStyledRect) {
-        const { position, width, height, color } = opts;
-        this.displayObject.beginFill((color || 0x000000));
+        const { position, width, height, color, opacity } = opts;
+        this.displayObject.beginFill((color || 0x000000), (opacity || 1));
         this.displayObject.drawRect(position.x, position.y, width, height);
         this.displayObject.endFill();
     }

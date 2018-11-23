@@ -256,7 +256,7 @@ const chartContainer = document.createElement('div');
 chartContainer.id = 'main_chart';
 container.appendChild(chartContainer);
 
-const controller = new TimeGraphUnitController(timeGraph.totalRange, {start: 70000, end: 80000});
+const controller = new TimeGraphUnitController(timeGraph.totalRange, {start: 10000, end: 40000});
 
 const timeAxis = new TimeGraphAxis({
     id: 'timeGraphAxis',
@@ -268,7 +268,8 @@ axisContainer.appendChild(timeAxis.canvas);
 const timeGraphChart = new TimeGraphChart({
     id: timeGraph.id + '_chart',
     height: 300,
-    width: 500
+    width: 500,
+    backgroundColor: 0xFFFFFF
 }, controller);
 timeGraphChart.addRows(timeGraph.rows);
 chartContainer.appendChild(timeGraphChart.canvas);

@@ -32,13 +32,6 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
         }
         this.addEvent('mouseup', moveEnd, this._displayObject);
         this.addEvent('mouseupoutside', moveEnd, this._displayObject);
-
-        unitController.onViewRangeChanged(() => this.update());
-    }
-
-    update() {
-        this._displayObject.clear();
-        this.render();
     }
 
     render() {
@@ -53,7 +46,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
         for (let i = 0; i < steps; i++) {
             const height = i % 10 === 0 ? -10 : -5;
             const xpos = (stepLength * i - this.unitController.viewRange.start) * this.stateController.zoomFactor;
-            if (xpos > 0 && xpos < this.stateController.canvasWidth) {
+            if (xpos >= 0 && xpos < this.stateController.canvasWidth) {
                 const position = {
                     x: xpos,
                     y: this.options.height
@@ -65,7 +58,6 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
                 });
             }
         }
-
     }
 
     zoom(zoomStep: number) {

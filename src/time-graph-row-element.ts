@@ -33,9 +33,8 @@ export class TimeGraphRowElement extends TimeGraphComponent {
     }
 
     protected changeColor(color: number) {
-        this.displayObject.clear();
         this.style.color = color;
-        this.render();
+        this.update();
     }
 
     protected handleMouseOver = ((event: PIXI.interaction.InteractionEvent) => {

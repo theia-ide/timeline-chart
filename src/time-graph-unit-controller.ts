@@ -34,12 +34,17 @@ export class TimeGraphUnitController {
         return this._viewRange;
     }
     set viewRange(newRange: TimeGraphRange) {
-        const greaterThanAbsoluteRange = (newRange.start + this.viewRangeLength) > this.absoluteRange;
-        if (newRange.end > newRange.start && !greaterThanAbsoluteRange) {
+        if (newRange.end > newRange.start) {
             this._viewRange = newRange;
-        } else if(greaterThanAbsoluteRange) {
-            this._viewRange = {start: newRange.start, end: (this.absoluteRange - newRange.start)};
         }
+        if(newRange.start < 0) {
+            this._viewRange.start = 0;
+        }
+        if(this._viewRange.end > this.absoluteRange){
+            this._viewRange.end = this.absoluteRange;
+        }
+        console.log("ViewRange", this._viewRange.start, this._viewRange.end);
+        console.log("AbsoluteRange", this.absoluteRange);
         this.handleViewRangeChange();
     }
 

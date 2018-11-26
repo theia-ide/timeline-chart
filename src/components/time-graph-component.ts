@@ -59,7 +59,7 @@ export abstract class TimeGraphComponent {
 
     protected rect(opts: TimeGraphStyledRect) {
         const { position, width, height, color, opacity } = opts;
-        this.displayObject.beginFill((color || 0x000000), (opacity || 1));
+        this.displayObject.beginFill((color || 0x000000), (opacity !== undefined ? opacity : 1));
         this.displayObject.drawRect(position.x, position.y, width, height);
         this.displayObject.endFill();
     }

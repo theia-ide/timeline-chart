@@ -1,22 +1,15 @@
-import { TimeGraphContainer, TimeGraphContainerOptions } from "./time-graph-container";
-import { TimeGraphUnitController } from "./time-graph-unit-controller";
-import { TimeGraphComponent, TimeGraphStyledRect } from "./time-graph-component";
-import { TimeGraphStateController } from "./time-graph-state-controller";
-import { TimeGraphRectangle } from "./time-graph-rectangle";
+import { TimeGraphUnitController } from "../time-graph-unit-controller";
+import { TimeGraphComponent, TimeGraphStyledRect } from "../components/time-graph-component";
+import { TimeGraphStateController } from "../time-graph-state-controller";
+import { TimeGraphRectangle } from "../components/time-graph-rectangle";
+import { TimeGraphLayer } from "./time-graph-layer";
 
-export class TimeGraphNavigator extends TimeGraphContainer {
+export class TimeGraphNavigator extends TimeGraphLayer {
 
     protected navigatorHandle: TimeGraphNavigatorHandle;
     protected selectionRange: TimeGraphRectangle;
 
-    constructor(protected canvasOpts: TimeGraphContainerOptions, protected unitController: TimeGraphUnitController) {
-        super({
-            id: canvasOpts.id,
-            height: canvasOpts.height,
-            width: canvasOpts.width,
-            backgroundColor: 0x111111
-        }, unitController);
-
+    init() {
         this.unitController.onViewRangeChanged(() => this.update());
         this.navigatorHandle = new TimeGraphNavigatorHandle(this.unitController, this.stateController);
         this.addChild(this.navigatorHandle);
@@ -30,7 +23,7 @@ export class TimeGraphNavigator extends TimeGraphContainer {
         if (this.unitController.selectionRange) {
             const selectionOpts: TimeGraphStyledRect = {
                 color: 0xf6f666,
-                height: this.canvasOpts.height,
+                height: this.canvas.height,
                 opacity: 0.5,
                 position: {
                     x: this.unitController.selectionRange.start * this.stateController.absoluteResolution,

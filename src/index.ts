@@ -1,8 +1,11 @@
 import { TimeGraphModel } from "./time-graph-model";
-import { TimeGraphAxis } from "./time-graph-axis";
-import { TimeGraphChart } from "./time-graph-chart";
+import { TimeGraphAxis } from "./layer/time-graph-axis";
+import { TimeGraphChart } from "./layer/time-graph-chart";
 import { TimeGraphUnitController } from "./time-graph-unit-controller";
-import { TimeGraphNavigator } from "./time-graph-navigator";
+import { TimeGraphNavigator } from "./layer/time-graph-navigator";
+import { TimeGraphContainer } from "./time-graph-container";
+import { TimeGraphChartCursors } from "./layer/time-graph-chart-cursors";
+import { TimeGraphAxisCursors } from "./layer/time-graph-axis-cursors";
 
 const timeGraph: TimeGraphModel = {
     id: 'test1',
@@ -248,41 +251,58 @@ if (!container) {
 }
 container.innerHTML = '';
 
-const axisContainer = document.createElement('div');
-axisContainer.id = 'main_axis';
-container.appendChild(axisContainer);
 
-const chartContainer = document.createElement('div');
-chartContainer.id = 'main_chart';
-container.appendChild(chartContainer);
 
-const controller = new TimeGraphUnitController(timeGraph.totalRange, {start: 10000, end: 40000});
+const axisHTMLContainer = document.createElement('div');
+axisHTMLContainer.id = 'main_axis';
+container.appendChild(axisHTMLContainer);
 
-const timeAxis = new TimeGraphAxis({
-    id: 'timeGraphAxis',
+const chartHTMLContainer = document.createElement('div');
+chartHTMLContainer.id = 'main_chart';
+container.appendChild(chartHTMLContainer);
+
+const unitController = new TimeGraphUnitController(timeGraph.totalRange, {start: 10000, end: 40000});
+
+const timeGraphAxisContainer = new TimeGraphContainer({
     height: 30,
-    width: 500
-}, controller);
-axisContainer.appendChild(timeAxis.canvas);
+    width: 500,
+    id: timeGraph.id + '_axis',
+    backgroundColor: 0x66aa33
+}, unitController);
+axisHTMLContainer.appendChild(timeGraphAxisContainer.canvas);
 
-const timeGraphChart = new TimeGraphChart({
+const timeAxisLayer = new TimeGraphAxis('timeGraphAxis');
+timeGraphAxisContainer.addLayer(timeAxisLayer);
+
+const timeAxisCursors = new TimeGraphAxisCursors('timeGraphAxisCursors');
+timeGraphAxisContainer.addLayer(timeAxisCursors);
+
+const timeGraphChartContainer = new TimeGraphContainer({
     id: timeGraph.id + '_chart',
     height: 300,
     width: 500,
     backgroundColor: 0xFFFFFF
-}, controller);
-timeGraphChart.addRows(timeGraph.rows);
-chartContainer.appendChild(timeGraphChart.canvas);
+}, unitController);
+chartHTMLContainer.appendChild(timeGraphChartContainer.canvas);
+
+const timeGraphChartLayer = new TimeGraphChart('timeGraphChart');
+timeGraphChartContainer.addLayer(timeGraphChartLayer);
+timeGraphChartLayer.addRows(timeGraph.rows);
+
+const timeGraphChartCursors = new TimeGraphChartCursors('chart-cursors');
+timeGraphChartContainer.addLayer(timeGraphChartCursors);
 
 const naviEl = document.createElement('div');
 naviEl.id = "navi";
 document.body.appendChild(naviEl);
-const navi = new TimeGraphNavigator({
-    width:1200,
+const naviContainer = new TimeGraphContainer({
+    width:700,
     height:20,
     id:'navi'
-}, controller);
-naviEl.appendChild(navi.canvas);
+}, unitController);
+naviEl.appendChild(naviContainer.canvas);
+const navi = new TimeGraphNavigator('timeGraphNavigator');
+naviContainer.addLayer(navi);
 
 export type TestFieldId = 'test0' | 'test1' | 'test2' | 'test3' | 'test4' | 'test5' | 'test6' | 'test7' | 'test8' | 'test9';
 export function tgTest(id: TestFieldId, val: string) {

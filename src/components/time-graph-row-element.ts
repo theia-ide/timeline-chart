@@ -1,6 +1,6 @@
 import { TimeGraphComponent, TimeGraphStyledRect } from "./time-graph-component";
 import { TimeGraphRow } from "./time-graph-row";
-import { TimeGraphRowElementModel } from "./time-graph-model";
+import { TimeGraphRowElementModel } from "../time-graph-model";
 
 export class TimeGraphRowElement extends TimeGraphComponent {
 

@@ -1,7 +1,7 @@
 import { TimeGraphComponent, TimeGraphRect, TimeGraphInteractionHandler } from "./time-graph-component";
-import { TimeGraphUnitController } from "./time-graph-unit-controller";
-import { TimeGraphRange } from "./time-graph-model";
-import { TimeGraphStateController } from "./time-graph-state-controller";
+import { TimeGraphUnitController } from "../time-graph-unit-controller";
+import { TimeGraphRange } from "../time-graph-model";
+import { TimeGraphStateController } from "../time-graph-state-controller";
 
 export class TimeGraphAxisScale extends TimeGraphComponent {
 

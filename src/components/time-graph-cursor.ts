@@ -7,14 +7,16 @@ export interface TimeGraphCursorOptions {
 }
 
 export class TimeGraphCursor extends TimeGraphComponent{
-    constructor(protected opts: TimeGraphCursorOptions){
-        super('cursor')
+    constructor(opts: TimeGraphCursorOptions){
+        super('cursor');
+        this.options = opts;
     }
     render(): void {
+        const {color, height, position} = this.options as TimeGraphCursorOptions;
         this.vline({
-            color:this.opts.color,
-            height: this.opts.height,
-            position: this.opts.position
+            color,
+            height,
+            position
         })
     }
 }

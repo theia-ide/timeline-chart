@@ -1,15 +1,15 @@
-import { TimeGraphRowElement } from "./time-graph-row-element";
-import { TimeGraphRow } from "./time-graph-row";
-import { TimeGraphRowModel, TimeGraphRowElementModel } from "./time-graph-model";
-import { TimeGraphCursorContainer } from "./time-graph-cursor-container";
-import { TimeGraphRectangle } from "./time-graph-rectangle";
+import { TimeGraphRowElement } from "../components/time-graph-row-element";
+import { TimeGraphRow } from "../components/time-graph-row";
+import { TimeGraphRowModel, TimeGraphRowElementModel } from "../time-graph-model";
+import { TimeGraphLayer } from "./time-graph-layer";
 
-export class TimeGraphChart extends TimeGraphCursorContainer {
+export class TimeGraphChart extends TimeGraphLayer {
 
     protected rows: TimeGraphRowModel[];
+    protected rowCount: number;
 
     protected init(){
-        super.init();
+        this.rowCount = 0;
         this.unitController.onViewRangeChanged(() => {
             this.update();
         });
@@ -17,7 +17,7 @@ export class TimeGraphChart extends TimeGraphCursorContainer {
 
     addRow(row: TimeGraphRowModel) {
         const height = 20;
-        const rowId = 'row_' + this._stage.children.length;
+        const rowId = 'row_' + this.rowCount;
         const range = row.range.end - row.range.start;
         const relativeStartPosition = row.range.start - this.unitController.viewRange.start;
         const rowComponent = new TimeGraphRow(rowId, {
@@ -35,7 +35,7 @@ export class TimeGraphChart extends TimeGraphCursorContainer {
             const relativeElementEndPosition = rowElement.range.end - this.unitController.viewRange.start;
             const start = (relativeElementStartPosition * this.stateController.zoomFactor) + this.stateController.positionOffset.x;
             const end = (relativeElementEndPosition * this.stateController.zoomFactor) + this.stateController.positionOffset.x;
-            if (start < this._canvas.width && end > 0) {
+            if (start < this.canvas.width && end > 0) {
                 const newRowElement: TimeGraphRowElementModel = {
                     label: rowElement.label,
                     range: {
@@ -50,23 +50,20 @@ export class TimeGraphChart extends TimeGraphCursorContainer {
     }
 
     addRows(rows: TimeGraphRowModel[]) {
-        const background = new TimeGraphRectangle({
-            position: {x: 0, y:0},
-            height: this._canvas.height,
-            width: this.canvas.width,
-            color: 0xffffff
-        });
-        this.addChild(background);
+        if(!this.stateController){
+            throw('Add this TimeGraphChart to a container before adding rows.');
+        }
         this.rows = [];
+        this.rowCount = 0;
         rows.forEach(row => {
+            this.rowCount++;
             this.addRow(row);
         })
     }
 
     update() {
-        this.stage.removeChildren();
+        this.removeChildren();
         this.addRows(this.rows);
-        super.update();
     }
 
 }

@@ -1,21 +1,27 @@
-import { TimeGraphContainer } from "./time-graph-container";
-import { TimeGraphCursor } from "./time-graph-cursor";
-import { TimeGraphRectangle } from "./time-graph-rectangle";
+import { TimeGraphCursor } from "../components/time-graph-cursor";
+import { TimeGraphRectangle } from "../components/time-graph-rectangle";
+import { TimeGraphLayer } from "./time-graph-layer";
 
-export class TimeGraphCursorContainer extends TimeGraphContainer {
+export class TimeGraphChartCursors extends TimeGraphLayer {
     protected mouseIsDown: boolean;
     protected shiftKeyDown: boolean;
+    protected firstCursor: TimeGraphCursor;
+    protected secondCursor: TimeGraphCursor;
+    protected selectionRange: TimeGraphRectangle;
+
     protected init() {
+        this.addBackground();
+
         this.mouseIsDown = false;
         this.shiftKeyDown = false
-        this._stage.interactive = true;
+        this.stage.interactive = true;
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             this.shiftKeyDown = event.shiftKey;
         });
         document.addEventListener('keyup', (event: KeyboardEvent) => {
             this.shiftKeyDown = event.shiftKey;
         });
-        this._stage.on('mousedown', (event: PIXI.interaction.InteractionEvent) => {
+        this.stage.on('mousedown', (event: PIXI.interaction.InteractionEvent) => {
             this.mouseIsDown = true;
             const mouseX = event.data.global.x;
             const xpos = this.unitController.viewRange.start + (mouseX / this.stateController.zoomFactor);
@@ -32,7 +38,7 @@ export class TimeGraphCursorContainer extends TimeGraphContainer {
                 }
             }
         });
-        this._stage.on('mousemove', (event: PIXI.interaction.InteractionEvent) => {
+        this.stage.on('mousemove', (event: PIXI.interaction.InteractionEvent) => {
             if (this.mouseIsDown && this.unitController.selectionRange) {
                 const mouseX = event.data.global.x;
                 const xStartPos = this.unitController.selectionRange.start;
@@ -43,41 +49,56 @@ export class TimeGraphCursorContainer extends TimeGraphContainer {
                 }
             }
         });
-        this._stage.on('mouseup', (event: PIXI.interaction.InteractionEvent) => {
+        this.stage.on('mouseup', (event: PIXI.interaction.InteractionEvent) => {
             this.mouseIsDown = false;
         });
-        this._stage.on('mouseupoutside', (event: PIXI.interaction.InteractionEvent) => {
+        this.stage.on('mouseupoutside', (event: PIXI.interaction.InteractionEvent) => {
             this.mouseIsDown = false;
         });
-        this.unitController.onSelectionRangeChange(() => {
-            this.update();
-        })
+        this.unitController.onSelectionRangeChange(() => this.update());
+        this.unitController.onViewRangeChanged(() => this.update());
+    }
+
+    // this background is needed because an empty stage, or a point at that stage which is not actually an displayObject, wont react on mouse events.
+    protected addBackground(){
+        const background = new TimeGraphRectangle({
+            position: {x: 0, y:0},
+            height: this.canvas.height,
+            width: this.canvas.width,
+            opacity: 0
+        });
+        this.addChild(background);
     }
 
     update() {
+        this.removeChildren();
+        this.addBackground();
         if (this.unitController.selectionRange) {
             const firstCursorPosition = (this.unitController.selectionRange.start - this.unitController.viewRange.start) * this.stateController.zoomFactor;
             const secondCursorPosition = (this.unitController.selectionRange.end - this.unitController.viewRange.start) * this.stateController.zoomFactor;
             const color = 0x0000ff;
-            const firstCursor = new TimeGraphCursor({
+            const firstCursorOptions = {
                 color,
                 height: this.canvas.height,
                 position: {
                     x: firstCursorPosition,
                     y: 0
                 }
-            });
-            this.addChild(firstCursor);
+            };
+            this.firstCursor = new TimeGraphCursor(firstCursorOptions);
+            this.addChild(this.firstCursor);
             if (secondCursorPosition !== firstCursorPosition) {
-                const secondCursor = new TimeGraphCursor({
+                const secondCursorOptions = {
                     color,
                     height: this.canvas.height,
                     position: {
                         x: secondCursorPosition,
                         y: 0
                     }
-                });
-                this.addChild(secondCursor);
+                };
+                this.secondCursor = new TimeGraphCursor(secondCursorOptions);
+                this.addChild(this.secondCursor);
+
                 const selectionRange = new TimeGraphRectangle({
                     color,
                     opacity: 0.2,
@@ -85,7 +106,7 @@ export class TimeGraphCursorContainer extends TimeGraphContainer {
                         x: firstCursorPosition,
                         y: 0
                     },
-                    height: this._canvas.height,
+                    height: this.canvas.height,
                     width: secondCursorPosition - firstCursorPosition
                 });
                 this.addChild(selectionRange);

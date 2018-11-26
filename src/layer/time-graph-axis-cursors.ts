@@ -1,9 +1,14 @@
-import { TimeGraphContainer } from "./time-graph-container";
-import { TimeGraphAxisCursor } from "./time-graph-axis-cursor";
+import { TimeGraphAxisCursor } from "../components/time-graph-axis-cursor";
+import { TimeGraphLayer } from "./time-graph-layer";
 
-export class TimeGraphAxisCursorContainer extends TimeGraphContainer {
+export class TimeGraphAxisCursors extends TimeGraphLayer {
     protected firstCursor: TimeGraphAxisCursor;
     protected secondCursor: TimeGraphAxisCursor;
+
+    init() {
+        this.unitController.onSelectionRangeChange(() => this.update());
+        this.unitController.onViewRangeChanged(() => this.update());
+    }
 
     update(): void {
         if (this.unitController.selectionRange) {
@@ -14,7 +19,7 @@ export class TimeGraphAxisCursorContainer extends TimeGraphContainer {
                 color,
                 position: {
                     x: firstCursorPosition,
-                    y: this._canvas.height
+                    y: this.canvas.height
                 }
             };
             if (!this.firstCursor) {
@@ -28,7 +33,7 @@ export class TimeGraphAxisCursorContainer extends TimeGraphContainer {
                     color,
                     position: {
                         x: secondCursorPosition,
-                        y: this._canvas.height
+                        y: this.canvas.height
                     }
                 }
                 if (!this.secondCursor) {

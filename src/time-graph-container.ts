@@ -1,7 +1,7 @@
-import { TimeGraphComponent } from "./time-graph-component";
 import * as PIXI from "pixi.js";
 import { TimeGraphUnitController } from "./time-graph-unit-controller";
 import { TimeGraphStateController } from "./time-graph-state-controller";
+import { TimeGraphLayer } from "./layer/time-graph-layer";
 
 export interface TimeGraphContainerOptions {
     id: string
@@ -11,12 +11,14 @@ export interface TimeGraphContainerOptions {
     transparent?: boolean
 }
 
-export abstract class TimeGraphContainer {
+export class TimeGraphContainer {
 
-    protected _stage: PIXI.Container;
+    protected stage: PIXI.Container;
     protected _canvas: HTMLCanvasElement;
 
     protected stateController: TimeGraphStateController;
+
+    protected layers: TimeGraphLayer[];
 
     constructor(protected config: TimeGraphContainerOptions, protected unitController: TimeGraphUnitController) {
         const canvas: HTMLCanvasElement = document.createElement('canvas');
@@ -33,28 +35,20 @@ export abstract class TimeGraphContainer {
         });
         application.stage.height = config.height;
 
-        this._stage = application.stage;
+        this.stage = application.stage;
         this._canvas = application.view;
 
         this.stateController = new TimeGraphStateController(canvas, unitController);
 
-        this.init();
+        this.layers = [];
     }
-
-    protected init(){}
 
     get canvas(): HTMLCanvasElement {
         return this._canvas;
     }
 
-    get stage(): PIXI.Container {
-        return this._stage;
+    addLayer(layer: TimeGraphLayer) {
+        this.layers.push(layer);
+        layer.initializeLayer(this._canvas, this.stage, this.stateController, this.unitController);
     }
-
-    protected addChild(child: TimeGraphComponent) {
-        child.render();
-        this._stage.addChild(child.displayObject);
-    }
-
-    abstract update(): void;
 }

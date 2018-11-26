@@ -1,12 +1,12 @@
-import { TimeGraphAxisScale } from "./time-graph-axis-scale";
-import { TimeGraphAxisCursorContainer } from "./time-graph-axis-cursor-container";
+import { TimeGraphAxisScale } from "../components/time-graph-axis-scale";
+import { TimeGraphLayer } from "./time-graph-layer";
 
-export class TimeGraphAxis extends TimeGraphAxisCursorContainer {
+export class TimeGraphAxis extends TimeGraphLayer {
 
     protected scaleComponent: TimeGraphAxisScale;
 
     protected init() {
-        this._canvas.addEventListener('mousewheel', (ev: WheelEvent) => {
+        this.canvas.addEventListener('mousewheel', (ev: WheelEvent) => {
             const shiftStep = ev.deltaY * 10;
             const oldViewRange = this.unitController.viewRange;
             let start = oldViewRange.start + shiftStep;
@@ -21,9 +21,9 @@ export class TimeGraphAxis extends TimeGraphAxisCursorContainer {
             this.unitController.viewRange = { start, end }
             return false;
         });
-        this.scaleComponent = new TimeGraphAxisScale(this.config.id + '_scale', {
+        this.scaleComponent = new TimeGraphAxisScale(this.id + '_scale', {
             height: 30,
-            width: this._canvas.width,
+            width: this.canvas.width,
             position: {
                 x: 0,
                 y: 0
@@ -39,12 +39,11 @@ export class TimeGraphAxis extends TimeGraphAxisCursorContainer {
     update() {
         this.scaleComponent.update({
             height: 30,
-            width: this._canvas.width,
+            width: this.canvas.width,
             position: {
                 x: 0,
                 y: 0
             }
         });
-        super.update();
     }
 }

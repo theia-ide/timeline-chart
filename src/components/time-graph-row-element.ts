@@ -4,52 +4,48 @@ import { TimeGraphRowElementModel } from "../time-graph-model";
 
 export class TimeGraphRowElement extends TimeGraphComponent {
 
-    protected style: TimeGraphStyledRect;
+    protected _style: TimeGraphStyledRect;
 
-    constructor(id: string, protected options: TimeGraphRowElementModel, protected row: TimeGraphRow) {
+    constructor(
+        id: string,
+        protected _options: TimeGraphRowElementModel,
+        protected _row: TimeGraphRow,
+        style: { color?: number, height?: number } = { color: 0xfffa66, height: 14 }
+    ) {
         super(id);
-        const height = 20;
+        const height = style.height || 14;
         const position = {
-            x: this.options.range.start,
-            y: this.row.position.y - (height / 2)
+            x: this._options.range.start,
+            y: this._row.position.y - (height / 2)
         };
-        const width = this.options.range.end - this.options.range.start;
-
-        this.style = {
-            color: 0xC80000,
+        const width = this._options.range.end - this._options.range.start;
+        this._style = {
+            color: style.color,
             height,
             position,
             width
         };
-
-        this.addEvent('mouseover', this.handleMouseOver, this._displayObject);
-        this.addEvent('mouseout', this.handleMouseOut, this._displayObject);
-        this.addEvent('mousedown', this.handleMouseDown, this._displayObject);
-        this.addEvent('mouseup', this.handleMouseUp, this._displayObject);
     }
 
-    render() {
-        this.rect(this.style);
+    get model(): TimeGraphRowElementModel {
+        return this._options;
     }
 
-    protected changeColor(color: number) {
-        this.style.color = color;
+    get row(): TimeGraphRow {
+        return this._row;
+    }
+
+    set style(style: { color?: number, height?: number }) {
+        if (style.color) {
+            this._style.color = style.color;
+        }
+        if (style.height) {
+            this._style.height = style.height;
+        }
         this.update();
     }
 
-    protected handleMouseOver = ((event: PIXI.interaction.InteractionEvent) => {
-        this.changeColor(0x00C800);
-    }).bind(this);
-
-    protected handleMouseOut = ((event: PIXI.interaction.InteractionEvent) => {
-        this.changeColor(0xC80000);
-    }).bind(this);
-
-    protected handleMouseDown = ((event: PIXI.interaction.InteractionEvent) => {
-        this.changeColor(0x0000C8);
-    }).bind(this);
-
-    protected handleMouseUp = ((event: PIXI.interaction.InteractionEvent) => {
-        this.changeColor(0x00C800);
-    }).bind(this);
+    render() {
+        this.rect(this._style);
+    }
 }

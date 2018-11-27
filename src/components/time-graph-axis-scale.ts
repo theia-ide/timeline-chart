@@ -11,7 +11,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
 
     protected mouseIsDown: boolean = false;
 
-    constructor(id: string, protected options: TimeGraphRect, protected unitController: TimeGraphUnitController, protected stateController: TimeGraphStateController) {
+    constructor(id: string, protected _options: TimeGraphRect, protected unitController: TimeGraphUnitController, protected stateController: TimeGraphStateController) {
         super(id);
 
         this.addEvent('mousedown', event => {
@@ -37,9 +37,9 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
     render() {
         this.rect({
             color: 0xededdd,
-            height: this.options.height,
-            width: this.options.width,
-            position: this.options.position
+            height: this._options.height,
+            width: this._options.width,
+            position: this._options.position
         });
         const stepLength = 1000;
         const steps = Math.trunc(this.unitController.absoluteRange / stepLength);
@@ -49,7 +49,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
             if (xpos >= 0 && xpos < this.stateController.canvasWidth) {
                 const position = {
                     x: xpos,
-                    y: this.options.height
+                    y: this._options.height
                 };
                 this.vline({
                     position,

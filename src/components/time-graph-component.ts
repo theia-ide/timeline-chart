@@ -29,7 +29,7 @@ export type TimeGraphVerticalLine = TimeGraphVerticalElement & TimeGraphLineStyl
 
 export abstract class TimeGraphComponent {
     protected _displayObject: PIXI.Graphics;
-    protected options: TimeGraphComponentOptions;
+    protected _options: TimeGraphComponentOptions;
 
     constructor(protected _id: string) {
         this._displayObject = new PIXI.Graphics();
@@ -49,7 +49,7 @@ export abstract class TimeGraphComponent {
 
     update(opts?: TimeGraphComponentOptions) {
         if (opts) {
-            this.options = opts;
+            this._options = opts;
         }
         this.clear();
         this.render();
@@ -80,10 +80,10 @@ export abstract class TimeGraphComponent {
 
     addEvent(event: TimeGraphInteractionType, handler: TimeGraphInteractionHandler, displayObject: PIXI.DisplayObject) {
         displayObject.interactive = true;
-        displayObject.on(event, (e: PIXI.interaction.InteractionEvent) => {
+        displayObject.on(event, ((e: PIXI.interaction.InteractionEvent) => {
             if (handler) {
                 handler(e);
             }
-        });
+        }).bind(this));
     }
 }

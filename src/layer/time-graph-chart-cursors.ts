@@ -8,6 +8,8 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
     protected firstCursor: TimeGraphCursor;
     protected secondCursor: TimeGraphCursor;
     protected selectionRange: TimeGraphRectangle;
+    protected navigateLeftHandler: () => void;
+    protected navigateRightHandler: () => void;
 
     protected init() {
         this.addBackground();
@@ -17,6 +19,11 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
         this.stage.interactive = true;
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             this.shiftKeyDown = event.shiftKey;
+            if (event.keyCode === 37) {
+                this.goLeft();
+            } else if (event.keyCode === 39) {
+                this.goRight();
+            }
         });
         document.addEventListener('keyup', (event: KeyboardEvent) => {
             this.shiftKeyDown = event.shiftKey;
@@ -59,10 +66,30 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
         this.unitController.onViewRangeChanged(() => this.update());
     }
 
+    onNavigateLeft(handler: () => void) {
+        this.navigateLeftHandler = handler;
+    }
+
+    protected goLeft() {
+        if (this.navigateLeftHandler) {
+            this.navigateLeftHandler();
+        }
+    }
+
+    onNavigateRight(handler: () => void) {
+        this.navigateRightHandler = handler;
+    }
+
+    protected goRight() {
+        if (this.navigateRightHandler) {
+            this.navigateRightHandler();
+        }
+    }
+
     // this background is needed because an empty stage, or a point at that stage which is not actually an displayObject, wont react on mouse events.
-    protected addBackground(){
+    protected addBackground() {
         const background = new TimeGraphRectangle({
-            position: {x: 0, y:0},
+            position: { x: 0, y: 0 },
             height: this.canvas.height,
             width: this.canvas.width,
             opacity: 0

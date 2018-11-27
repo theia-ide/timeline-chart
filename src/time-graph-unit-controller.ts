@@ -43,8 +43,6 @@ export class TimeGraphUnitController {
         if(this._viewRange.end > this.absoluteRange){
             this._viewRange.end = this.absoluteRange;
         }
-        console.log("ViewRange", this._viewRange.start, this._viewRange.end);
-        console.log("AbsoluteRange", this.absoluteRange);
         this.handleViewRangeChange();
     }
 

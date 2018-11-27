@@ -13,7 +13,7 @@ export abstract class TimeGraphLayer {
         this.children = [];
     }
 
-    addChild(child: TimeGraphComponent) {
+    protected addChild(child: TimeGraphComponent) {
         if(!this.stage){
             throw("Layers must be added to a container before components can be added.");
         }
@@ -22,6 +22,9 @@ export abstract class TimeGraphLayer {
         this.children.push(child.displayObject);
     }
 
+    /**
+    This method is called by the container this layer is added to.
+    */
     initializeLayer(canvas:HTMLCanvasElement, stage: PIXI.Container, stateController: TimeGraphStateController, unitController: TimeGraphUnitController) {
         this.canvas = canvas;
         this.stage = stage;

@@ -5,17 +5,27 @@ export interface TimeGraphRange {
 
 export interface TimeGraphModel {
     id: string
-    name: string
     totalRange: number
     rows: TimeGraphRowModel[]
+    arrows: TimeGraphArrow[]
 }
 
 export interface TimeGraphRowModel {
+    id: number
+    name: string
     range: TimeGraphRange
     states: TimeGraphRowElementModel[]
 }
 
 export interface TimeGraphRowElementModel {
+    readonly range: TimeGraphRange
+    readonly label: string
+    readonly data?: {[key:string]:any}
+}
+
+export interface TimeGraphArrow {
+    sourceId: number
+    destinationId: number
     range: TimeGraphRange
-    label: string
+    data?: {[key:string]:any}
 }

@@ -11,7 +11,7 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
     protected navigateLeftHandler: () => void;
     protected navigateRightHandler: () => void;
 
-    protected init() {
+    protected afterAddToContainer() {
         this.addBackground();
 
         this.mouseIsDown = false;
@@ -66,19 +66,12 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
         this.unitController.onViewRangeChanged(() => this.update());
     }
 
-    onNavigateLeft(handler: () => void) {
-        this.navigateLeftHandler = handler;
-    }
-
     protected goLeft() {
         if (this.navigateLeftHandler) {
             this.navigateLeftHandler();
         }
     }
 
-    onNavigateRight(handler: () => void) {
-        this.navigateRightHandler = handler;
-    }
 
     protected goRight() {
         if (this.navigateRightHandler) {
@@ -90,11 +83,34 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
     protected addBackground() {
         const background = new TimeGraphRectangle({
             position: { x: 0, y: 0 },
-            height: this.canvas.height,
-            width: this.canvas.width,
+            height: this.stateController.canvasDisplayHeight,
+            width: this.stateController.canvasDisplayWidth,
             opacity: 0
         });
         this.addChild(background);
+    }
+
+    onNavigateLeft(handler: () => void) {
+        this.navigateLeftHandler = handler;
+    }
+
+    onNavigateRight(handler: () => void) {
+        this.navigateRightHandler = handler;
+    }
+
+    centerCursor() {
+        if (this.unitController.selectionRange) {
+            const cursorPosition = this.unitController.selectionRange.start;
+            const halfViewRangeLength = this.unitController.viewRangeLength / 2;
+            this.unitController.viewRange = {
+                start: cursorPosition - halfViewRangeLength,
+                end: cursorPosition + halfViewRangeLength
+            }
+        }
+    }
+
+    removeCursors() {
+        this.unitController.selectionRange = undefined;
     }
 
     update() {
@@ -106,7 +122,7 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
             const color = 0x0000ff;
             const firstCursorOptions = {
                 color,
-                height: this.canvas.height,
+                height: this.stateController.canvasDisplayHeight,
                 position: {
                     x: firstCursorPosition,
                     y: 0
@@ -117,7 +133,7 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
             if (secondCursorPosition !== firstCursorPosition) {
                 const secondCursorOptions = {
                     color,
-                    height: this.canvas.height,
+                    height: this.stateController.canvasDisplayHeight,
                     position: {
                         x: secondCursorPosition,
                         y: 0
@@ -133,7 +149,7 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
                         x: firstCursorPosition,
                         y: 0
                     },
-                    height: this.canvas.height,
+                    height: this.stateController.canvasDisplayHeight,
                     width: secondCursorPosition - firstCursorPosition
                 });
                 this.addChild(selectionRange);

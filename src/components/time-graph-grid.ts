@@ -1,45 +1,29 @@
-import { TimeGraphComponent } from "./time-graph-component";
+import { TimeGraphAxisScale } from "./time-graph-axis-scale";
+import { TimeGraphRect } from "./time-graph-component";
 import { TimeGraphUnitController } from "../time-graph-unit-controller";
 import { TimeGraphStateController } from "../time-graph-state-controller";
 
-export class TimeGraphGrid extends TimeGraphComponent {
+export class TimeGraphGrid extends TimeGraphAxisScale {
 
-    constructor(
-        protected unitController: TimeGraphUnitController,
-        protected stateController: TimeGraphStateController,
-        protected rowHeight: number) {
-        super('');
+    constructor(id: string, protected _options: TimeGraphRect, protected rowHeight: number, protected unitController: TimeGraphUnitController, protected stateController: TimeGraphStateController) {
+        super(id, _options, unitController, stateController);
     }
 
-    render(): void {
-        const stepLength = 10000;
-        const steps = Math.trunc(this.unitController.absoluteRange / stepLength);
-        for (let i = 0; i < steps; i++) {
-            const xpos = (stepLength * i - this.unitController.viewRange.start) * this.stateController.zoomFactor;
-            if (xpos >= 0 && xpos < this.stateController.canvasDisplayWidth) {
-                const position = {
-                    x: xpos,
-                    y: 0
-                };
-                this.vline({
-                    position,
-                    height: this.stateController.canvasDisplayHeight,
-                    color: 0xdddddd
-                });
-            }
-        }
+    protected addEvents() { }
 
-        const rowNumber = Math.trunc(this.stateController.canvasDisplayHeight /this.rowHeight) + 2;
-        for(let i = 0; i < rowNumber; i++){
+    render(): void {
+        this.renderVerticalLines(this.stateController.canvasDisplayHeight, 0xdddddd);
+
+        const rowNumber = Math.trunc(this.stateController.canvasDisplayHeight / this.rowHeight) + 2;
+        for (let i = 0; i < rowNumber; i++) {
             this.hline({
                 color: 0xdddddd,
                 position: {
-                    x: 0,
-                    y: (i * this.rowHeight) - (this.rowHeight/2)
+                    x: this._options.position.x,
+                    y: (i * this.rowHeight) - (this.rowHeight / 2)
                 },
-                width: this.stateController.canvasDisplayWidth
+                width: this._options.width
             });
         }
     }
-
 }

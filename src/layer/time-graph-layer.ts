@@ -3,7 +3,7 @@ import { TimeGraphUnitController } from "../time-graph-unit-controller";
 import { TimeGraphStateController } from "../time-graph-state-controller";
 
 export abstract class TimeGraphLayer {
-    protected canvas: HTMLCanvasElement;
+    private canvas: HTMLCanvasElement;
     protected stateController: TimeGraphStateController;
     protected unitController: TimeGraphUnitController;
     protected children: TimeGraphComponent[];
@@ -30,14 +30,18 @@ export abstract class TimeGraphLayer {
         this.stage = stage;
         this.stateController = stateController;
         this.unitController = unitController;
-        this.init();
+        this.afterAddToContainer();
+    }
+
+    protected onCanvasEvent(type: string, handler: (event:Event)=>void){
+        this.canvas.addEventListener(type, handler);
     }
 
     protected removeChildren() {
         this.children.forEach(child => this.stage.removeChild(child.displayObject));
     }
 
-    protected init() { }
+    protected afterAddToContainer() { }
 
     protected abstract update(): void;
 }

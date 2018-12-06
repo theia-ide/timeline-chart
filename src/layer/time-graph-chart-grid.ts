@@ -5,12 +5,16 @@ export class TimeGraphChartGrid extends TimeGraphLayer {
 
     protected gridComponent: TimeGraphGrid;
 
-    constructor(id:string, protected rowHeight: number){
+    constructor(id: string, protected rowHeight: number) {
         super(id);
     }
 
-    protected init() {
-        this.gridComponent = new TimeGraphGrid(this.unitController, this.stateController, this.rowHeight);
+    protected afterAddToContainer() {
+        this.gridComponent = new TimeGraphGrid('', {
+            height: this.stateController.canvasDisplayHeight,
+            position: { x: 0, y: 0 },
+            width: this.stateController.canvasDisplayWidth
+        }, this.rowHeight, this.unitController, this.stateController);
         this.addChild(this.gridComponent);
         this.unitController.onViewRangeChanged(() => this.update());
     }

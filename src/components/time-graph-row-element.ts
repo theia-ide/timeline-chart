@@ -24,7 +24,7 @@ export class TimeGraphRowElement extends TimeGraphComponent {
         const height = style.height || 14;
         const position = {
             x: this.range.start,
-            y: this._row.position.y - (height / 2)
+            y: this._row.position.y + ((this.row.height - height) / 2)
         };
         const width = this.range.end - this.range.start;
         this.rectangleOptions = {
@@ -52,10 +52,10 @@ export class TimeGraphRowElement extends TimeGraphComponent {
         if (style.height !== undefined) {
             this.rectangleOptions.height = style.height;
         }
-        if(style.borderColor !== undefined){
+        if (style.borderColor !== undefined) {
             this.rectangleOptions.borderColor = style.color;
         }
-        if(style.borderWidth !== undefined) {
+        if (style.borderWidth !== undefined) {
             this.rectangleOptions.borderWidth = style.borderWidth;
         }
         this.update();

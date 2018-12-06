@@ -5,8 +5,8 @@ export class TimeGraphAxis extends TimeGraphLayer {
 
     protected scaleComponent: TimeGraphAxisScale;
 
-    protected init() {
-        this.canvas.addEventListener('mousewheel', (ev: WheelEvent) => {
+    protected afterAddToContainer() {
+        this.onCanvasEvent('mousewheel', (ev: WheelEvent) => {
             const shiftStep = ev.deltaY;
             const oldViewRange = this.unitController.viewRange;
             let start = oldViewRange.start + (shiftStep / this.stateController.zoomFactor);
@@ -22,8 +22,8 @@ export class TimeGraphAxis extends TimeGraphLayer {
             return false;
         });
         this.scaleComponent = new TimeGraphAxisScale(this.id + '_scale', {
-            height: 30,
-            width: this.canvas.width,
+            height: this.stateController.canvasDisplayHeight,
+            width: this.stateController.canvasDisplayWidth,
             position: {
                 x: 0,
                 y: 0
@@ -38,8 +38,8 @@ export class TimeGraphAxis extends TimeGraphLayer {
 
     update() {
         this.scaleComponent.update({
-            height: 30,
-            width: this.canvas.width,
+            height: this.stateController.canvasDisplayHeight,
+            width: this.stateController.canvasDisplayWidth,
             position: {
                 x: 0,
                 y: 0

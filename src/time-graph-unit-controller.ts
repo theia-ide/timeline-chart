@@ -4,8 +4,8 @@ export class TimeGraphUnitController {
     protected viewRangeChangedHandler: ((newRange: TimeGraphRange) => void)[];
     protected _viewRange: TimeGraphRange;
 
-    protected selectionRangeChangedHandler: ((newRange: TimeGraphRange) => void)[];
-    protected _selectionRange: TimeGraphRange;
+    protected selectionRangeChangedHandler: ((newRange?: TimeGraphRange) => void)[];
+    protected _selectionRange?: TimeGraphRange;
 
     constructor(public absoluteRange: number, viewRange?: TimeGraphRange) {
         this.viewRangeChangedHandler = [];
@@ -46,10 +46,10 @@ export class TimeGraphUnitController {
         this.handleViewRangeChange();
     }
 
-    get selectionRange(): TimeGraphRange {
+    get selectionRange(): TimeGraphRange | undefined {
         return this._selectionRange;
     }
-    set selectionRange(value: TimeGraphRange) {
+    set selectionRange(value: TimeGraphRange | undefined) {
         this._selectionRange = value;
         this.handleSelectionRangeChange();
 

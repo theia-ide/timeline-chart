@@ -2,10 +2,10 @@ import { TimeGraphAxisCursor } from "../components/time-graph-axis-cursor";
 import { TimeGraphLayer } from "./time-graph-layer";
 
 export class TimeGraphAxisCursors extends TimeGraphLayer {
-    protected firstCursor: TimeGraphAxisCursor;
-    protected secondCursor: TimeGraphAxisCursor;
+    protected firstCursor?: TimeGraphAxisCursor;
+    protected secondCursor?: TimeGraphAxisCursor;
 
-    init() {
+    afterAddToContainer() {
         this.unitController.onSelectionRangeChange(() => this.update());
         this.unitController.onViewRangeChanged(() => this.update());
     }
@@ -19,7 +19,7 @@ export class TimeGraphAxisCursors extends TimeGraphLayer {
                 color,
                 position: {
                     x: firstCursorPosition,
-                    y: this.canvas.height
+                    y: this.stateController.canvasDisplayHeight
                 }
             };
             if (!this.firstCursor) {
@@ -33,7 +33,7 @@ export class TimeGraphAxisCursors extends TimeGraphLayer {
                     color,
                     position: {
                         x: secondCursorPosition,
-                        y: this.canvas.height
+                        y: this.stateController.canvasDisplayHeight
                     }
                 }
                 if (!this.secondCursor) {
@@ -45,6 +45,10 @@ export class TimeGraphAxisCursors extends TimeGraphLayer {
             } else if (this.secondCursor) {
                 this.secondCursor.clear();
             }
+        } else {
+            this.removeChildren();
+            this.firstCursor = undefined;
+            this.secondCursor = undefined;
         }
     }
 }

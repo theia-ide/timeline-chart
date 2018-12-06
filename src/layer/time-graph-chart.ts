@@ -1,5 +1,5 @@
 import { TimeGraphRowElement, TimeGraphRowElementStyle } from "../components/time-graph-row-element";
-import { TimeGraphRow } from "../components/time-graph-row";
+import { TimeGraphRow, TimeGraphRowStyle } from "../components/time-graph-row";
 import { TimeGraphRowModel, TimeGraphRowElementModel, TimeGraphRange } from "../time-graph-model";
 import { TimeGraphLayer } from "./time-graph-layer";
 import { TimeGraphComponent } from "../components/time-graph-component";
@@ -17,18 +17,18 @@ export class TimeGraphChart extends TimeGraphLayer {
     protected rows: TimeGraphRowModel[];
     protected rowHeight: number;
     protected rowElementStyleHook: (el: TimeGraphRowElementModel) => TimeGraphRowElementStyle | undefined;
+    protected rowStyleHook: (row: TimeGraphRowModel) => TimeGraphRowStyle | undefined;
     protected rowElementMouseInteractions: TimeGraphRowElementMouseInteractions;
     protected selectedElementModel: TimeGraphRowElementModel;
-    protected selectedElementChangedHandler: ((el: TimeGraphRowElementModel) => void)[];
-    protected selectedRow: TimeGraphRow;
-    protected selectedRowChangedHandler: ((el: TimeGraphRow) => void)[];
+    protected selectedElementChangedHandler: ((el: TimeGraphRowElementModel) => void)[] = [];
+    protected selectedRow: TimeGraphRowModel;
+    protected selectedRowChangedHandler: ((el: TimeGraphRowModel) => void)[] = [];
+    protected verticalOffset: number = 0;
 
-    protected init() {
+    protected afterAddToContainer() {
         this.unitController.onViewRangeChanged(() => {
             this.update();
         });
-        this.selectedElementChangedHandler = [];
-        this.selectedRowChangedHandler = [];
     }
 
     protected handleSelectedRowElementChange() {
@@ -43,34 +43,40 @@ export class TimeGraphChart extends TimeGraphLayer {
         const rowId = 'row_' + rowIndex;
         const range = row.range.end - row.range.start;
         const relativeStartPosition = row.range.start - this.unitController.viewRange.start;
+        const rowStyle = this.rowStyleHook ? this.rowStyleHook(row) : undefined;
         const rowComponent = new TimeGraphRow(rowId, {
             position: {
                 x: relativeStartPosition * this.stateController.zoomFactor,
-                y: (height * rowIndex) + (height / 2)
+                y: (height * rowIndex) - this.verticalOffset
             },
-            width: range * this.stateController.zoomFactor
-        }, rowIndex);
+            width: range * this.stateController.zoomFactor,
+            height
+        }, rowIndex, row, rowStyle);
         this.addChild(rowComponent);
-        row.states.forEach((rowModel: TimeGraphRowElementModel, elementIndex: number) => {
-            const relativeElementStartPosition = rowModel.range.start - this.unitController.viewRange.start;
-            const relativeElementEndPosition = rowModel.range.end - this.unitController.viewRange.start;
+        row.states.forEach((rowElementModel: TimeGraphRowElementModel, elementIndex: number) => {
+            const relativeElementStartPosition = rowElementModel.range.start - this.unitController.viewRange.start;
+            const relativeElementEndPosition = rowElementModel.range.end - this.unitController.viewRange.start;
             const start = (relativeElementStartPosition * this.stateController.zoomFactor) + this.stateController.positionOffset.x;
             const end = (relativeElementEndPosition * this.stateController.zoomFactor) + this.stateController.positionOffset.x;
-            if (start < this.canvas.width && end > 0) {
+            if (start < this.stateController.canvasDisplayWidth && end > 0) {
                 const range: TimeGraphRange = {
                     start,
                     end
                 };
-                const style = this.rowElementStyleHook ? this.rowElementStyleHook(rowModel) : undefined;
-                const el = new TimeGraphRowElement('el_' + rowModel.id, rowModel, range, rowComponent, style);
+                const elementStyle = this.rowElementStyleHook ? this.rowElementStyleHook(rowElementModel) : undefined;
+                const el = new TimeGraphRowElement(rowElementModel.id, rowElementModel, range, rowComponent, elementStyle);
                 this.addElementInteractions(el);
                 this.addChild(el);
             }
         });
     }
 
-    protected selectRow(row: TimeGraphRow) {
+    protected selectRow(row: TimeGraphRowModel) {
+        if (this.selectedRow) {
+            this.selectedRow.selected = false;
+        }
         this.selectedRow = row;
+        row.selected = true;
         this.handleSelectedRowChange();
     }
 
@@ -111,7 +117,7 @@ export class TimeGraphChart extends TimeGraphLayer {
         this.rowHeight = height;
         rows.forEach((row: TimeGraphRowModel, index: number) => {
             this.addRow(row, height, index);
-        })
+        });
     }
 
     protected update() {
@@ -119,6 +125,10 @@ export class TimeGraphChart extends TimeGraphLayer {
             this.removeChildren();
             this.addRows(this.rows, this.rowHeight);
         }
+    }
+
+    registerRowStyleHook(styleHook: (row: TimeGraphRowModel) => TimeGraphRowStyle | undefined) {
+        this.rowStyleHook = styleHook;
     }
 
     registerRowElementStyleHook(styleHook: (el: TimeGraphRowElementModel) => TimeGraphRowElementStyle | undefined) {
@@ -133,7 +143,7 @@ export class TimeGraphChart extends TimeGraphLayer {
         this.selectedElementChangedHandler.push(handler);
     }
 
-    onSelectedRowChanged(handler: (row: TimeGraphRow) => void) {
+    onSelectedRowChanged(handler: (row: TimeGraphRowModel) => void) {
         this.selectedRowChangedHandler.push(handler);
     }
 
@@ -143,7 +153,7 @@ export class TimeGraphChart extends TimeGraphLayer {
 
     getElementById(id: string): TimeGraphRowElement | undefined {
         const element: TimeGraphComponent | undefined = this.children.find((child) => {
-            return child.id === 'el_' + id;
+            return child.id === id;
         });
         return element as TimeGraphRowElement;
     }
@@ -156,7 +166,7 @@ export class TimeGraphChart extends TimeGraphLayer {
         model.selected = true;
         const el = this.getElementById(model.id);
         if (el) {
-            this.selectRow(el.row);
+            this.selectRow(el.row.model);
         }
         this.handleSelectedRowElementChange();
         this.update();
@@ -165,6 +175,11 @@ export class TimeGraphChart extends TimeGraphLayer {
     setRowModel(rows: TimeGraphRowModel[], rowHeight: number) {
         this.rowHeight = rowHeight;
         this.rows = rows;
+        this.update();
+    }
+
+    setVerticalPositionOffset(ypos: number){
+        this.verticalOffset = ypos;
         this.update();
     }
 }

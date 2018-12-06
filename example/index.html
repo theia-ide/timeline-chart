@@ -8,15 +8,15 @@
 			overscroll-behavior: none;
 		}
 
-        #demoContainer {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-        }
+		#demoContainer {
+			width: 100%;
+			display: flex;
+			justify-content: center;
+		}
 
 		#main {
 			border: 1px solid;
-			margin: 10px;
+			margin: 10px 0;
 			overflow: hidden;
 		}
 
@@ -27,14 +27,46 @@
 		.innerContainer {
 			width: 100%;
 		}
+
+        #main-vscroll {
+            margin-top: 40px;
+        }
+
+		#cursor-reset {
+			border: 1px solid grey;
+			background-color: #dddddd;
+			width: 170px;
+			cursor: pointer;
+			display: flex;
+			justify-content: center;
+		}
+
+		#test-button-row {
+			width: 100%;
+			display: flex;
+			justify-content: center;
+		}
+
+		#test-buttons {
+			width: 1000px;
+			display: flex;
+			justify-content: left;
+		}
 	</style>
 </head>
 
 <body>
 	<div id='demoContainer'>
 		<div id='main'></div>
+        <div id='main-vscroll'></div>
+	</div>
+	<div id='test-button-row'>
+		<div id='test-buttons'>
+			<div id='cursor-reset'>Reset selection cursors</div>
+		</div>
 	</div>
 	<script type="text/javascript" src="./bundle.js" charset="utf-8">
+
 	</script>
 </body>
 

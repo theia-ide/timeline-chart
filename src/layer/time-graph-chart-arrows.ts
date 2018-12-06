@@ -8,7 +8,7 @@ export class TimeGraphChartArrows extends TimeGraphLayer {
     protected rowHeight: number;
     protected arrows: TimeGraphArrow[];
 
-    protected init() {
+    protected afterAddToContainer() {
         this.unitController.onViewRangeChanged(() => this.update());
     }
 

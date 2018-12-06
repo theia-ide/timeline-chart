@@ -7,9 +7,9 @@ import { TimeGraphLayer } from "./time-graph-layer";
 export class TimeGraphNavigator extends TimeGraphLayer {
 
     protected navigatorHandle: TimeGraphNavigatorHandle;
-    protected selectionRange: TimeGraphRectangle;
+    protected selectionRange?: TimeGraphRectangle;
 
-    init() {
+    afterAddToContainer() {
         this.unitController.onViewRangeChanged(() => this.update());
         this.navigatorHandle = new TimeGraphNavigatorHandle(this.unitController, this.stateController);
         this.addChild(this.navigatorHandle);
@@ -23,7 +23,7 @@ export class TimeGraphNavigator extends TimeGraphLayer {
         if (this.unitController.selectionRange) {
             const selectionOpts: TimeGraphStyledRect = {
                 color: 0xb7b799,
-                height: this.canvas.height,
+                height: this.stateController.canvasDisplayHeight,
                 opacity: 0.5,
                 position: {
                     x: this.unitController.selectionRange.start * this.stateController.absoluteResolution,
@@ -38,6 +38,10 @@ export class TimeGraphNavigator extends TimeGraphLayer {
                 this.selectionRange.displayObject.clear();
                 this.selectionRange.setOptions(selectionOpts);
                 this.selectionRange.render();
+            }
+        } else {
+            if(this.selectionRange){
+                this.selectionRange.clear();
             }
         }
     }

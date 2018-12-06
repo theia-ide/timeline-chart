@@ -87,7 +87,8 @@ export const timeGraph: TimeGraphModel = {
                     },
                     selected: false
                 },
-            ]
+            ],
+            selected: false
         },
         {
             id: 1,
@@ -154,7 +155,8 @@ export const timeGraph: TimeGraphModel = {
                     },
                     selected: false
                 }
-            ]
+            ],
+            selected: false
         },
         {
             id: 2,
@@ -194,7 +196,8 @@ export const timeGraph: TimeGraphModel = {
                     },
                     selected: false
                 }
-            ]
+            ],
+            selected: false
         },
         {
             id: 3,
@@ -234,7 +237,8 @@ export const timeGraph: TimeGraphModel = {
                     },
                     selected: false
                 }
-            ]
+            ],
+            selected: false
         },
         {
             id: 4,
@@ -277,7 +281,8 @@ export const timeGraph: TimeGraphModel = {
                     },
                     selected: false
                 }
-            ]
+            ],
+            selected: false
         },
         {
             id: 5,
@@ -338,7 +343,8 @@ export const timeGraph: TimeGraphModel = {
                     },
                     selected: false
                 }
-            ]
+            ],
+            selected: false
         }
     ],
     arrows: [

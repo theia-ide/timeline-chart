@@ -45,7 +45,6 @@ export class TimeGraphAxis extends TimeGraphLayer {
             this.id + '_scale',
             this.getOptions(),
             this.unitController,
-            this.stateController,
             this.numberTranslator
         );
         this.addChild(this.scaleComponent);
@@ -55,7 +54,18 @@ export class TimeGraphAxis extends TimeGraphLayer {
     }
 
     update() {
-        this.scaleComponent.update(this.getOptions());
+        this.scaleComponent.update({
+            x: {
+                start: this.unitController.viewRange.start,
+                end: this.unitController.viewRange.start,
+                pixelFactor: (this.unitController.viewRange.end - this.unitController.viewRange.start) / this.stateController.canvasDisplayWidth
+            },
+            y: {
+                start: 0,
+                end: 13,
+                pixelFactor: 1
+            },
+        });
     }
 
     registerNumberTranslator(translator: (theNumber: number) => string) {

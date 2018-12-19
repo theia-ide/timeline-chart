@@ -5,11 +5,9 @@ import { TimeGraphNavigator } from "timeline-chart/lib/layer/time-graph-navigato
 import { TimeGraphContainer } from "timeline-chart/lib/time-graph-container";
 import { TimeGraphChartCursors } from "timeline-chart/lib/layer/time-graph-chart-cursors";
 import { TimeGraphAxisCursors } from "timeline-chart/lib/layer/time-graph-axis-cursors";
-// import { timeGraph } from "timeline-chart/lib/test-data";
 import { TimeGraphRowElementModel, TimeGraphRowModel, TimeGraphRange } from "timeline-chart/lib/time-graph-model";
 import { TimeGraphRowElement, TimeGraphRowElementStyle } from "timeline-chart/lib/components/time-graph-row-element";
 import { TestDataProvider } from "./test-data-provider";
-import { TimeGraphChartGrid } from "timeline-chart/lib/layer/time-graph-chart-grid";
 import { TimeGraphVerticalScrollbar } from "timeline-chart/lib/layer/time-graph-vertical-scrollbar";
 import { TimeGraphChartArrows } from "timeline-chart/lib/layer/time-graph-chart-arrows";
 
@@ -105,9 +103,6 @@ const timeGraphChartContainer = new TimeGraphContainer({
 chartHTMLContainer.appendChild(timeGraphChartContainer.canvas);
 
 const rowHeight = 16;
-
-const timeGraphChartGridLayer = new TimeGraphChartGrid('timeGraphGrid', rowHeight);
-timeGraphChartContainer.addLayer(timeGraphChartGridLayer);
 
 const timeGraphChartLayer = new TimeGraphChart('timeGraphChart', rowHeight);
 timeGraphChartContainer.addLayer(timeGraphChartLayer);

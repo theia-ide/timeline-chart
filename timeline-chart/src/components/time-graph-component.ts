@@ -3,6 +3,28 @@ export type TimeGraphInteractionHandler = (event: PIXI.interaction.InteractionEv
 
 export type TimeGraphComponentOptions = {}
 
+export interface ViewportInformation {
+    x: VisibleRange;
+    y: VisibleRange;
+}
+
+export interface VisibleRange {
+    /*
+     * the first visible logical unit
+     */
+    start: number;
+
+    /*
+     * the last visible logical unit
+     */
+    end: number;
+
+    /*
+     * how many pixel are used to represent one logical unit
+     */
+    pixelFactor: number;
+}
+
 export interface TimeGraphElementStyle {
     color?: number
     opacity?: number
@@ -32,7 +54,7 @@ export type TimeGraphVerticalLine = TimeGraphVerticalElement & TimeGraphLineStyl
 
 export abstract class TimeGraphComponent {
     protected _displayObject: PIXI.Graphics;
-    protected _options: TimeGraphComponentOptions;
+    protected viewportInformation: ViewportInformation;
 
     constructor(protected _id: string, displayObject?: PIXI.Graphics) {
         this._displayObject = displayObject || new PIXI.Graphics();
@@ -50,10 +72,8 @@ export abstract class TimeGraphComponent {
         this._displayObject.clear();
     }
 
-    update(opts?: TimeGraphComponentOptions) {
-        if (opts) {
-            this._options = opts;
-        }
+    update(viewportInformation: ViewportInformation) {
+        this.viewportInformation = viewportInformation;
         this.clear();
         this.render();
     }
@@ -64,22 +84,47 @@ export abstract class TimeGraphComponent {
         const { position, width, height, color, opacity, borderColor, borderWidth, borderRadius } = opts;
         this.displayObject.lineStyle(borderWidth || 0, borderColor || 0x000000);
         this.displayObject.beginFill((color || 0xffffff), (opacity !== undefined ? opacity : 1));
-        this.displayObject.drawRoundedRect(position.x + 0.5, position.y + 0.5, width, height, borderRadius || 0);
+        this.displayObject.drawRoundedRect(this.toXpx(position.x) + 0.5, this.toYpx(position.y) + 0.5, this.toWidthPx(width), this.toHeightPx(height), borderRadius || 0);
         this.displayObject.endFill();
     }
 
     protected hline(opts: TimeGraphHorizontalLine) {
         const { position, width, thickness, color, opacity } = opts;
         this.displayObject.lineStyle(thickness || 1, color || 0x000000, (opacity !== undefined ? opacity : 1));
-        this.displayObject.moveTo(position.x, position.y + 0.5);
-        this.displayObject.lineTo(position.x + width, position.y + 0.5);
+        this.displayObject.moveTo(this.toXpx(position.x), this.toYpx(position.y) + 0.5);
+        this.displayObject.lineTo(this.toXpx(position.x + width), this.toYpx(position.y) + 0.5);
     }
 
     protected vline(opts: TimeGraphVerticalLine) {
         const { position, height, thickness, color, opacity } = opts;
         this.displayObject.lineStyle(thickness || 1, color || 0x000000, (opacity !== undefined ? opacity : 1));
-        this.displayObject.moveTo(position.x + 0.5, position.y);
-        this.displayObject.lineTo(position.x + 0.5, position.y + height);
+        this.displayObject.moveTo(this.toXpx(position.x + 0.5), this.toYpx(position.y));
+        this.displayObject.lineTo(this.toXpx(position.x + 0.5), this.toYpx(position.y + height));
+    }
+
+    protected text(label: string, position: TimeGraphElementPosition) {
+        const result = new PIXI.Text(label, {
+            fontSize: 10
+        });
+        result.x = this.toXpx(position.x);
+        result.y = this.toXpx(position.y);
+        this._displayObject.addChild(result);
+    }
+
+    protected toXpx(logicalX: number): number {
+        return this.toWidthPx(logicalX) - this.toWidthPx(this.viewportInformation.x.start);
+    }
+
+    protected toYpx(logicalY: number): number {
+        return this.toHeightPx(logicalY) - this.toHeightPx(this.viewportInformation.y.start);
+    }
+
+    protected toWidthPx(logical: number): number {
+        return logical * this.viewportInformation.x.pixelFactor;
+    }
+
+    protected toHeightPx(logical: number): number {
+        return logical * this.viewportInformation.y.pixelFactor;
     }
 
     addEvent(event: TimeGraphInteractionType, handler: TimeGraphInteractionHandler, displayObject: PIXI.DisplayObject) {

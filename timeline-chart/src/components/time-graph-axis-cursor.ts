@@ -7,17 +7,23 @@ export interface TimeGraphAxisCursorOptions extends TimeGraphComponentOptions {
 
 export class TimeGraphAxisCursor extends TimeGraphComponent {
 
-    constructor(protected _options: TimeGraphAxisCursorOptions) {
+    constructor(protected options: TimeGraphAxisCursorOptions) {
         super('cursor');
     }
 
+    setOptions(options: TimeGraphAxisCursorOptions) {
+        this.options = options;
+    }
+
     render(): void {
-        const { position, color } = this._options;
+        const { position, color } = this.options;
+        const x = this.toXpx(position.x);
+        const y = this.toYpx(position.y);
         this._displayObject.beginFill(color);
-        this._displayObject.moveTo(position.x, position.y);
-        this._displayObject.lineTo(position.x - 5, position.y - 5);
-        this._displayObject.lineTo(position.x + 5, position.y - 5);
-        this._displayObject.lineTo(position.x, position.y);
+        this._displayObject.moveTo(x, y);
+        this._displayObject.lineTo(x - 5, y - 5);
+        this._displayObject.lineTo(x + 5, y - 5);
+        this._displayObject.lineTo(x, y);
         this._displayObject.endFill();
     }
 

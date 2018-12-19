@@ -34,7 +34,7 @@ export class TimeGraphAxisCursors extends TimeGraphLayer {
                 this.firstCursor = new TimeGraphAxisCursor(firstOpts);
                 this.addChild(this.firstCursor);
             } else {
-                this.firstCursor.update(firstOpts);
+                this.firstCursor.setOptions(firstOpts);
             }
             if (secondCursorPosition !== firstCursorPosition) {
                 const secondOpts = {
@@ -48,7 +48,7 @@ export class TimeGraphAxisCursors extends TimeGraphLayer {
                     this.secondCursor = new TimeGraphAxisCursor(secondOpts);
                     this.addChild(this.secondCursor);
                 } else {
-                    this.secondCursor.update(secondOpts);
+                    this.secondCursor.setOptions(secondOpts);
                 }
             } else if (this.secondCursor) {
                 this.secondCursor.clear();

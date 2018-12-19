@@ -36,10 +36,10 @@ export class TimeGraphChart extends TimeGraphLayer {
 
     protected afterAddToContainer() {
         this.unitController.onViewRangeChanged(() => {
-            // TODO shouldn't be called on every view range change.
-            // Smarter decisions should be made here.
-            const rowData = this.pullHook(this.unitController.viewRange, this.stateController.zoomFactor);
-            this.setRowModel(rowData.rows);
+            if (this.needsMoreData()) {
+                const rowData = this.pullHook(this.unitController.viewRange, this.stateController.zoomFactor);
+                this.setRowModel(rowData.rows);
+            }
             this.update();
         });
         this.onCanvasEvent('mousewheel', (ev: WheelEvent) => {
@@ -61,6 +61,13 @@ export class TimeGraphChart extends TimeGraphLayer {
                 this.addRows(this.rows, this.rowHeight);
             }
         }, 40);
+    }
+
+    /**
+     * whether the data model needs to be updated
+     */
+    protected needsMoreData(): boolean {
+        return this.rows === undefined;
     }
 
     protected handleVerticalPositionChange() {

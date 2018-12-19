@@ -17,7 +17,6 @@ export abstract class TimeGraphLayer {
         if(!this.stage){
             throw("Layers must be added to a container before components can be added.");
         }
-        child.render();
         this.stage.addChild(child.displayObject);
         this.children.push(child);
     }

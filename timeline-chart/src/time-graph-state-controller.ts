@@ -1,10 +1,6 @@
 import { TimeGraphUnitController } from "./time-graph-unit-controller";
 
 export class TimeGraphStateController {
-    oldPositionOffset: {
-        x: number;
-        y: number;
-    };
     /**
         It is not the width of the canvas display buffer but of the canvas element in browser. Can be different depending on the display pixel ratio.
     */
@@ -14,8 +10,6 @@ export class TimeGraphStateController {
     */
     readonly canvasDisplayHeight: number;
 
-    protected _zoomFactor: number;
-    protected _initialZoomFactor: number;
     protected _positionOffset: {
         x: number;
         y: number;
@@ -28,9 +22,7 @@ export class TimeGraphStateController {
         const ratio = window.devicePixelRatio;
         this.canvasDisplayWidth = canvas.width / ratio;
         this.canvasDisplayHeight = canvas.height / ratio;
-        this._initialZoomFactor = this.zoomFactor;
         this._positionOffset = { x: 0, y: 0 };
-        this.oldPositionOffset = { x: 0, y: 0 };
         this.zoomChangedHandler = [];
         this.positionChangedHandler = [];
     }
@@ -49,13 +41,8 @@ export class TimeGraphStateController {
         this.positionChangedHandler.push(handler);
     }
 
-    get initialZoomFactor(): number {
-        return this._initialZoomFactor;
-    }
-
     get zoomFactor(): number{
-        this._zoomFactor = this.canvasDisplayWidth / this.unitController.viewRangeLength;
-        return this._zoomFactor;
+        return this.canvasDisplayWidth / this.unitController.viewRangeLength;
     }
 
     get absoluteResolution(): number {

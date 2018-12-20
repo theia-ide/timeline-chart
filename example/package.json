@@ -3,9 +3,9 @@
   "version": "0.0.2",
   "private": true,
   "scripts": {
-    "build": "webpack --mode development",
-    "watch": "webpack --watch --mode development",
-    "start": "webpack-dev-server --host 0.0.0.0"
+    "build": "webpack --mode=development",
+    "watch": "webpack --watch --mode=development",
+    "start": "webpack-dev-server --host 0.0.0.0 --mode=development"
   },
   "devDependencies": {
     "@types/lodash.throttle": "^4.1.4",

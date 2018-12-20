@@ -36,10 +36,8 @@ export class TimeGraphChart extends TimeGraphLayer {
 
     protected afterAddToContainer() {
         this.unitController.onViewRangeChanged(() => {
-            // TODO shouldn't be called on every view range change.
-            // Smarter decisions should be made here.
-            const rowData = this.pullHook(this.unitController.viewRange, this.stateController.zoomFactor);
-            this.setRowModel(rowData.rows);
+            this.stage.position.x = -(this.unitController.viewRange.start * this.stateController.zoomFactor);
+            this.stage.scale.x = this.stateController.zoomFactor;
             this.update();
         });
         this.onCanvasEvent('mousewheel', (ev: WheelEvent) => {
@@ -52,16 +50,13 @@ export class TimeGraphChart extends TimeGraphLayer {
                 verticalOffset = this.totalHeight - this.stateController.canvasDisplayHeight;
             }
             this.stateController.positionOffset.y = verticalOffset;
+            this.stage.position.y = -verticalOffset;
             this.handleVerticalPositionChange();
             return false;
         });
-        this.throttledUpdate = _.throttle(() => {
-            if (this.rows && this.rowHeight) {
-                this.removeChildren();
-                this.addRows(this.rows, this.rowHeight);
-            }
-        }, 40);
     }
+
+    update() {}
 
     protected handleVerticalPositionChange() {
         this.verticalPositionChangedHandler.forEach(handler => handler(this.stateController.positionOffset.y));
@@ -77,15 +72,14 @@ export class TimeGraphChart extends TimeGraphLayer {
 
     protected addRow(row: TimeGraphRowModel, height: number, rowIndex: number) {
         const rowId = 'row_' + rowIndex;
-        const range = row.range.end - row.range.start;
-        const relativeStartPosition = row.range.start - this.unitController.viewRange.start;
+        const length = row.range.end - row.range.start;
         const rowStyle = this.rowStyleHook ? this.rowStyleHook(row) : undefined;
         const rowComponent = new TimeGraphRow(rowId, {
             position: {
-                x: relativeStartPosition * this.stateController.zoomFactor,
-                y: (height * rowIndex) - this.stateController.positionOffset.y
+                x: row.range.start,
+                y: (height * rowIndex)
             },
-            width: range * this.stateController.zoomFactor,
+            width: length,
             height
         }, rowIndex, row, rowStyle);
         rowComponent.displayObject.interactive = true;
@@ -94,20 +88,16 @@ export class TimeGraphChart extends TimeGraphLayer {
         }).bind(this));
         this.addChild(rowComponent);
         row.states.forEach((rowElementModel: TimeGraphRowElementModel, elementIndex: number) => {
-            const relativeElementStartPosition = rowElementModel.range.start - this.unitController.viewRange.start;
-            const relativeElementEndPosition = rowElementModel.range.end - this.unitController.viewRange.start;
-            const start = (relativeElementStartPosition * this.stateController.zoomFactor) + this.stateController.positionOffset.x;
-            const end = (relativeElementEndPosition * this.stateController.zoomFactor) + this.stateController.positionOffset.x;
-            if (start < this.stateController.canvasDisplayWidth && end > 0) {
-                const range: TimeGraphRange = {
-                    start,
-                    end
-                };
-                const elementStyle = this.rowElementStyleHook ? this.rowElementStyleHook(rowElementModel) : undefined;
-                const el = new TimeGraphRowElement(rowElementModel.id, rowElementModel, range, rowComponent, elementStyle);
-                this.addElementInteractions(el);
-                this.addChild(el);
-            }
+            const start = rowElementModel.range.start;
+            const end = rowElementModel.range.end;
+            const range: TimeGraphRange = {
+                start,
+                end
+            };
+            const elementStyle = this.rowElementStyleHook ? this.rowElementStyleHook(rowElementModel) : undefined;
+            const el = new TimeGraphRowElement(rowElementModel.id, rowElementModel, range, rowComponent, elementStyle);
+            this.addElementInteractions(el);
+            this.addChild(el);
         });
     }
 
@@ -152,12 +142,12 @@ export class TimeGraphChart extends TimeGraphLayer {
         });
     }
 
-    protected update() {
-        this.throttledUpdate();
-    }
-
     registerPullHook(pullHook: (range: TimeGraphRange, resolution: number) => {rows: TimeGraphRowModel[], range: TimeGraphRange}){
         this.pullHook = pullHook;
+        // lets fetch everything
+        const rowData = this.pullHook({ start:0, end: this.unitController.absoluteRange}, 1);
+        this.setRowModel(rowData.rows);
+        this.addRows(rowData.rows, this.rowHeight);
     }
 
     registerRowStyleHook(styleHook: TimeGraphRowStyleHook) {
@@ -206,7 +196,6 @@ export class TimeGraphChart extends TimeGraphLayer {
         this.selectedRow = row;
         row.selected = true;
         this.handleSelectedRowChange();
-        this.update();
     }
 
     getSelectedRowElement(): TimeGraphRowElementModel {
@@ -224,16 +213,13 @@ export class TimeGraphChart extends TimeGraphLayer {
             this.selectRow(el.row.model);
         }
         this.handleSelectedRowElementChange();
-        this.update();
     }
 
     setRowModel(rows: TimeGraphRowModel[]) {
         this.rows = rows;
-        this.update();
     }
 
     setVerticalPositionOffset(ypos: number) {
         this.stateController.positionOffset.y = ypos;
-        this.update();
     }
 }

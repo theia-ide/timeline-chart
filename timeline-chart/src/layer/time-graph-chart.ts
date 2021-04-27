@@ -44,6 +44,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     protected selectedElementChangedHandler: ((el: TimelineChart.TimeGraphState) => void)[] = [];
     protected providedRange: TimelineChart.TimeGraphRange;
     protected providedResolution: number;
+    protected visibleEntries: number[] = [];
 
     protected fetching: boolean;
 
@@ -96,6 +97,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 verticalOffset = this.rowController.totalHeight - this.stateController.canvasDisplayHeight;
             }
             this.rowController.verticalOffset = verticalOffset;
+            this.visibleEntries = [];
+            this.updateChart();
         }
 
         const adjustZoom = (zoomPosition: number, zoomIn: boolean) => {
@@ -277,6 +280,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
         this.rowController.onVerticalOffsetChangedHandler(verticalOffset => {
             this.layer.position.y = -verticalOffset;
+            this.visibleEntries = [];
         });
 
         this.unitController.onViewRangeChanged(() => {
@@ -357,8 +361,18 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }
     }
 
+    public getVisibleEntries(): number[] {
+        if (this.visibleEntries.length == 0) {
+            this.updateScaleAndPosition();
+        }
+        return this.visibleEntries;
+    }
+
     protected updateScaleAndPosition() {
         if (this.rows) {
+            const top = 0;
+            const bottom = this.stateController.canvasDisplayHeight;
+            this.visibleEntries = [];
             this.rows.forEach((row: TimelineChart.TimeGraphRowModel) => {
                 const comp = this.rowComponents.get(row);
                 if (comp) {
@@ -366,11 +380,16 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                         height: this.rowController.rowHeight,
                         position: {
                             x: 0,
-                            y: comp.position.y
+                            y: comp.position.y - this.rowController.verticalOffset
                         },
                         width: this.stateController.canvasDisplayWidth
                     }
                     comp.update(opts);
+                    const cTop = comp.position.y;
+                    const cBottom = comp.height + cTop;
+                    if (cTop <= bottom && top <= cBottom) {
+                        this.visibleEntries.push(comp.model.id);
+                    }
                 }
                 row.states.forEach((state: TimelineChart.TimeGraphState, elementIndex: number) => {
                     const el = this.rowStateComponents.get(state);

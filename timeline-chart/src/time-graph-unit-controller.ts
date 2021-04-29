@@ -33,7 +33,7 @@ export class TimeGraphUnitController {
         this.viewRangeChangedHandlers.push(handler);
     }
 
-    onSelectionRangeChange(handler: (selectionRange: TimelineChart.TimeGraphRange) => void) {
+    onSelectionRangeChange(handler: (selectionRange?: TimelineChart.TimeGraphRange) => void) {
         this.selectionRangeChangedHandlers.push(handler);
     }
 

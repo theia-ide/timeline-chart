@@ -14,6 +14,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
     protected firstCursor?: TimeGraphCursor;
     protected secondCursor?: TimeGraphCursor;
     protected color: number = 0x0000ff;
+    protected zoomSelecting: boolean = false;
 
     constructor(id: string, protected chartLayer: TimeGraphChart, protected rowController: TimeGraphRowController, style?: { color?: number }) {
         super(id, rowController);
@@ -85,7 +86,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         });
         this.stage.on('mousemove', (event: PIXI.InteractionEvent) => {
             this.mouseButtons = event.data.buttons;
-            if (this.mouseSelecting && this.unitController.selectionRange) {
+            if ((this.zoomSelecting || this.mouseSelecting) && this.unitController.selectionRange) {
                 if ((this.mouseButtons & 1) === 0) {
                     // handle missed button mouseup event
                     this.mouseSelecting = false;
@@ -114,6 +115,42 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
                 }
             }
         };
+        // Zoom selection
+        this.stage.on('rightdown', (event: PIXI.InteractionEvent) => {
+            const mouseX = event.data.global.x;
+            const xpos = this.unitController.viewRange.start + (mouseX / this.stateController.zoomFactor);
+            this.zoomSelecting = true;
+            this.stage.cursor = 'crosshair';
+            this.unitController.selectionRange = {
+                start: xpos,
+                end: xpos
+            }
+        });
+        const rightUpHandler = (event: PIXI.InteractionEvent) => {
+            if (this.zoomSelecting) {
+                this.zoomSelecting = false;
+                this.stage.cursor = 'default';
+                if (this.unitController.selectionRange) {
+                    const minimum = Math.min(this.unitController.selectionRange.start,
+                        this.unitController.selectionRange.end);
+                    const maximum = Math.max(this.unitController.selectionRange.start,
+                        this.unitController.selectionRange.end);
+                    this.unitController.viewRange = {
+                        start: minimum,
+                        end: maximum
+                    }
+                    this.removeCursors();
+                    this.unitController.selectionRange = undefined;
+                }
+            }
+        }
+        this.stage.on('rightup', rightUpHandler);
+        this.stage.on('rightupoutside', rightUpHandler);
+        // Disable Context Menu to allow for right click selection
+        this.onCanvasEvent('contextmenu', (e => {
+            e.preventDefault();
+            return false;
+        }));
         this.stage.on('mouseup', mouseUpHandler);
         this.stage.on('mouseupoutside', mouseUpHandler);
         // right mouse button is not detected on stage
@@ -241,7 +278,14 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
     }
 
     removeCursors() {
-        this.unitController.selectionRange = undefined;
+        if (this.firstCursor) {
+            this.firstCursor.destroy();
+            this.firstCursor = undefined;
+        }
+        if (this.secondCursor) {
+            this.secondCursor.destroy();
+            this.secondCursor = undefined;
+        }
     }
 
     update() {
@@ -282,9 +326,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
                 delete this.secondCursor;
             }
         } else {
-            this.removeChildren();
-            delete this.firstCursor;
-            delete this.secondCursor;
+            this.removeCursors();
         }
     }
 }
